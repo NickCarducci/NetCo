@@ -487,12 +487,60 @@ class Auth extends React.Component {
             //Do employees of regular businesses with diverse customers have to report gifted sweat up to $15,000 per year?
           />
         )}
-        $40/month{space}
-        <b onClick={() => this.props.navigate("/terms")}>terms</b>
-        {space}
-        <b onClick={() => this.props.navigate("/privacy")}>privacy</b>
+        <span style={{ display: "flex" }}>
+          {this.state.user !== undefined && this.state.user.subscriptionId && (
+            <div
+              style={{
+                backgroundColor: "forestgreen",
+                borderRadius: "10px",
+                width: "20px",
+                height: "20px",
+                border: "1px dashed white"
+              }}
+              onClick={async () => {
+                var answer = window.confirm(
+                  "Would you like you delete your subscription? This cannot be undone."
+                );
+                answer &&
+                  (await fetch(
+                    "https://sea-turtle-app-cg9u4.ondigitalocean.app/deletesubscription",
+                    {
+                      method: "POST",
+                      headers: {
+                        "Access-Control-Request-Method": "POST",
+                        "Access-Control-Request-Headers": [
+                          "Origin",
+                          "Content-Type"
+                        ], //allow referer
+                        "Content-Type": "Application/JSON"
+                      },
+                      body: JSON.stringify({
+                        subscriptionId: this.state.user.subscriptionId
+                      })
+                    }
+                  ) //stripe account, not plaid access token payout yet
+                    .then(async (res) => await res.json())
+                    .then(async (result) => {
+                      if (result.status) return console.log(result);
+                      if (result.error) return console.log(result);
+                      if (!result.transactions)
+                        return console.log("dev error (Cash)", result);
+                    }));
+              }}
+            ></div>
+          )}
+          {space}$40/month |{space}
+          <b onClick={() => this.props.navigate("/terms")}>terms</b>
+          {space}|{space}
+          <b onClick={() => this.props.navigate("/privacy")}>privacy</b>
+          {space}
+        </span>
         <h2>Connect to QuickBooks to get started right away.</h2>
-        Scopebook keeps track of expenses with issuable cards.{space}
+        Reconcile purchases in the same view as your bank and card transactions.
+        {
+          space
+          /**Scopebook keeps track of expenses with issuable cards. */
+        }
         {meAuth !== undefined && (
           <span
             onClick={() => logoutofapp()}
@@ -510,6 +558,7 @@ class Auth extends React.Component {
           width={this.props.width}
           height={this.props.appHeight}
           user={this.state.user}
+          navigate={this.props.navigate}
         />
       </div>
     );

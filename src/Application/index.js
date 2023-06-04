@@ -572,75 +572,64 @@ class Application extends React.Component {
               {this.state.date.toLocaleDateString()}
             </div>
           </h3>
-          <table style={{ color: "grey" }}>
-            <thead>
-              <tr>
-                <td>
-                  {this.state.newSubscription && (
-                    <Elements stripe={stripePromise}>
-                      <ElementsConsumer>
-                        {({ stripe, elements }) => (
-                          <form
-                            onSubmit={async (e) => {
-                              e.preventDefault();
-                              //this.cardRef.current.tokenize().then((data) =>
-                              //{console.log("chargebee token", data.token);});
-                              const { email, name } = this.state,
-                                paymentMethod = await stripe.createPaymentMethod(
-                                  {
-                                    type: "card",
-                                    card: elements.getElement(CardElement),
-                                    billing_details: {
-                                      name,
-                                      email
-                                    }
-                                  }
-                                );
-                              //https://www.mohammadfaisal.dev/blog/how-to-create-a-stripe-subscription-with-reactjs-and-nodejs
-                              await fetch(
-                                "http://sea-turtle-app-cg9u4.ondigitalocean.app/subscribe",
-                                {
-                                  method: "POST",
-                                  headers: {
-                                    "Content-Type": "application/json"
-                                  },
-                                  body: JSON.stringify({
-                                    paymentMethod:
-                                      paymentMethod.paymentMethod.id,
-                                    name,
-                                    email,
-                                    priceId: "price_1NFOFLHEkeca3H6etn9uECwV"
-                                  })
-                                }
-                              )
-                                .then((res) => res.json())
-                                .then(async (response) => {
-                                  const confirmPayment = await stripe.confirmCardPayment(
-                                    response.clientSecret
-                                  );
+          {this.state.newSubscription && (
+            <Elements stripe={stripePromise}>
+              <ElementsConsumer>
+                {({ stripe, elements }) => (
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      //this.cardRef.current.tokenize().then((data) =>
+                      //{console.log("chargebee token", data.token);});
+                      const { email, name } = this.state,
+                        paymentMethod = await stripe.createPaymentMethod({
+                          type: "card",
+                          card: elements.getElement(CardElement),
+                          billing_details: {
+                            name,
+                            email
+                          }
+                        });
+                      //https://www.mohammadfaisal.dev/blog/how-to-create-a-stripe-subscription-with-reactjs-and-nodejs
+                      await fetch(
+                        "http://sea-turtle-app-cg9u4.ondigitalocean.app/subscribe",
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json"
+                          },
+                          body: JSON.stringify({
+                            paymentMethod: paymentMethod.paymentMethod.id,
+                            name,
+                            email,
+                            priceId: "price_1NFOFLHEkeca3H6etn9uECwV"
+                          })
+                        }
+                      )
+                        .then((res) => res.json())
+                        .then(async (response) => {
+                          const confirmPayment = await stripe.confirmCardPayment(
+                            response.clientSecret
+                          );
 
-                                  if (confirmPayment.error) {
-                                    console.log(confirmPayment.error.message);
-                                  } else {
-                                    updateDoc(
-                                      doc(
-                                        firestore,
-                                        "userDatas",
-                                        this.props.auth.uid
-                                      ),
-                                      {
-                                        subscriptionId: response.subscription
-                                      }
-                                    );
-                                    window.alert(
-                                      "Success! Check your email for the invoice. " +
-                                        "You can now add QuickBooks purchases through QuickNet."
-                                    );
-                                  }
-                                });
-                            }}
-                          >
-                            {/*<CardComponent
+                          if (confirmPayment.error) {
+                            console.log(confirmPayment.error.message);
+                          } else {
+                            updateDoc(
+                              doc(firestore, "userDatas", this.props.auth.uid),
+                              {
+                                subscriptionId: response.subscription
+                              }
+                            );
+                            window.alert(
+                              "Success! Check your email for the invoice. " +
+                                "You can now add QuickBooks purchases through QuickNet."
+                            );
+                          }
+                        });
+                    }}
+                  >
+                    {/*<CardComponent
                         style={{ width: "100%" }}
                         ref={this.cardRef}
                         onChange={this.onChange}
@@ -649,34 +638,29 @@ class Application extends React.Component {
                         <CardExpiry />
                         <CardCVV />
                       </CardComponent>*/}
-                            $40 per month
-                            <input
-                              placeholder="Name"
-                              type="text"
-                              value={this.state.name}
-                              onChange={(e) =>
-                                this.setState({ name: e.target.value })
-                              }
-                            />
-                            <br />
-                            <input
-                              placeholder="Email"
-                              type="text"
-                              value={this.state.email}
-                              onChange={(e) =>
-                                this.setState({ email: e.target.value })
-                              }
-                            />
-                            <CardElement stripe={stripe} elements={elements} />
-                            <button type="submit">Submit</button>
-                          </form>
-                        )}
-                      </ElementsConsumer>
-                    </Elements>
-                  )}
-                </td>
-              </tr>
-            </thead>
+                    $40 per month
+                    <input
+                      placeholder="Name"
+                      type="text"
+                      value={this.state.name}
+                      onChange={(e) => this.setState({ name: e.target.value })}
+                    />
+                    <br />
+                    <input
+                      placeholder="Email"
+                      type="text"
+                      value={this.state.email}
+                      onChange={(e) => this.setState({ email: e.target.value })}
+                    />
+                    <CardElement stripe={stripe} elements={elements} />
+                    <button type="submit">Submit</button>
+                  </form>
+                )}
+              </ElementsConsumer>
+            </Elements>
+          )}
+          <table style={{ color: "grey" }}>
+            <thead></thead>
             <tbody>
               {[
                 ...this.state
@@ -715,7 +699,7 @@ class Application extends React.Component {
                       <td>
                         {!x.MetaData && (
                           <div
-                            onClick={() => {
+                            onClick={async () => {
                               if (
                                 !this.state.chosenCustomer ||
                                 !this.state.chosenAccount
@@ -724,11 +708,11 @@ class Application extends React.Component {
                                   "please choose a customer AND account"
                                 );
                               if (!this.props.user.subscriptionId) {
-                                window.Chargebee.init({
+                                /*window.Chargebee.init({
                                   site: "quicknet",
                                   publishableKey:
                                     "test_Rvan90hQVJaEGMV5QHAeJRd4Cc5OqHr2"
-                                });
+                                });*/
                                 var answer = window.confirm(
                                   "Would you like to subscribe?"
                                 );
@@ -740,13 +724,47 @@ class Application extends React.Component {
                               const purchase = {
                                 paymentType: "CreditCard",
                                 AccountRef: this.state.chosenAccount,
-                                DetailType: "AccountBasedExpenseLineDetail",
-                                Amount: x.amount,
-                                AccountBasedExpenseLineDetail: {
-                                  AccountRef: this.state.chosenAccount,
-                                  CustomerRef: this.state.chosenCustomer
-                                }
+                                Line: [
+                                  {
+                                    DetailType: "AccountBasedExpenseLineDetail",
+                                    Amount: x.amount,
+                                    AccountBasedExpenseLineDetail: {
+                                      AccountRef: this.state.chosenAccount,
+                                      CustomerRef: this.state.chosenCustomer
+                                    }
+                                  }
+                                ],
+                                CurrencyRef: { value: "USD" }
                               };
+                              await fetch(
+                                "https://sea-turtle-app-cg9u4.ondigitalocean.app/addpurchase",
+                                {
+                                  method: "POST",
+                                  headers: {
+                                    "Access-Control-Request-Method": "POST",
+                                    "Access-Control-Request-Headers": [
+                                      "Origin",
+                                      "Content-Type"
+                                    ], //allow referer
+                                    "Content-Type": "Application/JSON"
+                                  },
+                                  body: JSON.stringify({
+                                    companyIDToken: this.state
+                                      .selectedQuickbooks,
+                                    purchase
+                                  })
+                                }
+                              ) //stripe account, not plaid access token payout yet
+                                .then(async (res) => await res.json())
+                                .then(async (result) => {
+                                  if (result.status) return console.log(result);
+                                  if (result.error) return console.log(result);
+                                  if (!result.transactions)
+                                    return console.log(
+                                      "dev error (Cash)",
+                                      result
+                                    );
+                                });
                             }}
                             style={{
                               width: "30px",
