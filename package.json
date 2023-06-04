@@ -1,0 +1,55 @@
+{
+  "name": "bookkeeping",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "main": "src/index.js",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "exenv": "^1.2.2",
+    "firebase": "9.22.1",
+    "pouchdb": "^7.2.2",
+    "pouchdb-upsert": "^2.2.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-helmet": "^6.1.0",
+    "react-phone-number-input": "3.1.8",
+    "react-plaid-link": "3.4.0",
+    "react-router-dom": "6.6.0",
+    "react-transition-group": "4.4.2",
+    "scriptjs": "2.5.9",
+    "ua-parser-js": "1.0.2"
+  },
+  "devDependencies": {
+    "react-scripts": "4.0.3",
+    "typescript": "4.9.4",
+    "webpack": "4.44.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NickCarducci/wavv.art"
+  },
+  "scripts": {
+    "restart": "rm -rf util/util.js && rm -rf .cache && rm -rf /node_modules && react-scripts start",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "false": {
+    "note": "not without a docket",
+    "browserslist": [
+      ">0.2%",
+      "not dead",
+      "not ie <= 11",
+      "not op_mini all"
+    ]
+  },
+  "browser": {
+    "crypto": false
+  },
+  "browserslist": [
+    "defaults",
+    "not ie 11"
+  ]
+}
