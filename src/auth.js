@@ -487,6 +487,7 @@ class Auth extends React.Component {
             //Do employees of regular businesses with diverse customers have to report gifted sweat up to $15,000 per year?
           />
         )}
+        $40/month{space}
         <b onClick={() => this.props.navigate("/terms")}>terms</b>
         {space}
         <b onClick={() => this.props.navigate("/privacy")}>privacy</b>
