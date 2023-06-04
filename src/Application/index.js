@@ -1,4 +1,16 @@
 import React from "react";
+/*import {
+  CardComponent,
+  CardNumber,
+  CardExpiry,
+  CardCVV
+} from "@chargebee/chargebee-js-react-wrapper";*/
+import {
+  CardElement,
+  Elements,
+  ElementsConsumer
+} from "@stripe/react-stripe-js";
+
 import { standardCatch } from "../Sudo";
 import { PlaidLink } from "react-plaid-link";
 import {
@@ -9,7 +21,11 @@ import {
   updateDoc
 } from "firebase/firestore";
 import firebase from ".././init-firebase.js";
+import { loadStripe } from "@stripe/stripe-js";
 
+const stripePromise = loadStripe(
+  "pk_test_51NFO1VHEkeca3H6eVJIo4umZBpLD7RLRZNr1Egh1ZzGRZg5fmDYRnawm4x65cr8JMusAgvrUx2C7MqHWZiEnWqMH00iAT6aJFd"
+);
 const firestore = getFirestore(firebase);
 
 class Account extends React.Component {
@@ -51,7 +67,10 @@ class Account extends React.Component {
                     ], //allow referer
                     "Content-Type": "Application/JSON"
                   },
-                  body: JSON.stringify({ access_token: x })
+                  body: JSON.stringify({
+                    subscriptionId: this.props.user.subscriptionId,
+                    access_token: x
+                  })
                 }
               ) //stripe account, not plaid access token payout yet
                 .then(async (res) => await res.json())
@@ -114,14 +133,16 @@ class Account extends React.Component {
 }
 
 class Application extends React.Component {
-  state = {
-    cardholders: [
-      {
-        individual: {
-          first_name: "Linda",
-          last_name: "Hughes"
-        }
-        /*spending_controls: {
+  constructor(props) {
+    super(props);
+    this.state = {
+      cardholders: [
+        {
+          individual: {
+            first_name: "Linda",
+            last_name: "Hughes"
+          }
+          /*spending_controls: {
           spending_limits: [
             {
               interval: "weekly",
@@ -129,18 +150,19 @@ class Application extends React.Component {
             }
           ]
         }*/
-      }
-    ],
-    plaidTransactions: [],
-    quickbooksTransactions: [],
-    accounts: [],
-    vendors: [],
-    customers: [],
-    banks: [],
-    date: new Date(),
-    chosenAccount: "accounts",
-    chosenCustomer: "customers"
-  };
+        }
+      ],
+      plaidTransactions: [],
+      quickbooksTransactions: [],
+      accounts: [],
+      vendors: [],
+      customers: [],
+      banks: [],
+      date: new Date(),
+      chosenAccount: "accounts",
+      chosenCustomer: "customers"
+    };
+  }
   componentDidUpdate = async (prevProps) => {
     if (this.props.auth !== prevProps.auth) {
       const state = new URLSearchParams(window.location.search).get("state");
@@ -168,6 +190,8 @@ class Application extends React.Component {
 
             updateDoc(doc(firestore, "userDatas", this.props.auth.uid), {
               quickbooks: arrayUnion(result.companyIDToken)
+            }).then(() => {
+              this.props.navigate("/");
             });
           })
           .catch(standardCatch);
@@ -344,7 +368,10 @@ class Application extends React.Component {
                       ], //allow referer
                       "Content-Type": "Application/JSON"
                     },
-                    body: JSON.stringify({ public_token: publicToken })
+                    body: JSON.stringify({
+                      subscriptionId: this.props.user.subscriptionId,
+                      public_token: publicToken
+                    })
                   }
                 ) //stripe account, not plaid access token payout yet
                   .then(async (res) => await res.json())
@@ -391,7 +418,9 @@ class Application extends React.Component {
                       ], //allow referer
                       "Content-Type": "Application/JSON"
                     },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({
+                      subscriptionId: this.props.user.subscriptionId
+                    })
                   }
                 ) //stripe account, not plaid access token payout yet
                   .then(async (res) => await res.json())
@@ -508,6 +537,7 @@ class Application extends React.Component {
                       "Content-Type": "Application/JSON"
                     },
                     body: JSON.stringify({
+                      subscriptionId: this.props.user.subscriptionId,
                       companyIDToken: this.state.selectedQuickbooks,
                       access_token: this.state.selectedItem,
                       start_date,
@@ -543,7 +573,110 @@ class Application extends React.Component {
             </div>
           </h3>
           <table style={{ color: "grey" }}>
-            <thead></thead>
+            <thead>
+              <tr>
+                <td>
+                  {this.state.newSubscription && (
+                    <Elements stripe={stripePromise}>
+                      <ElementsConsumer>
+                        {({ stripe, elements }) => (
+                          <form
+                            onSubmit={async (e) => {
+                              e.preventDefault();
+                              //this.cardRef.current.tokenize().then((data) =>
+                              //{console.log("chargebee token", data.token);});
+                              const { email, name } = this.state,
+                                paymentMethod = await stripe.createPaymentMethod(
+                                  {
+                                    type: "card",
+                                    card: elements.getElement(CardElement),
+                                    billing_details: {
+                                      name,
+                                      email
+                                    }
+                                  }
+                                );
+                              //https://www.mohammadfaisal.dev/blog/how-to-create-a-stripe-subscription-with-reactjs-and-nodejs
+                              await fetch(
+                                "http://sea-turtle-app-cg9u4.ondigitalocean.app/subscribe",
+                                {
+                                  method: "POST",
+                                  headers: {
+                                    "Content-Type": "application/json"
+                                  },
+                                  body: JSON.stringify({
+                                    paymentMethod:
+                                      paymentMethod.paymentMethod.id,
+                                    name,
+                                    email,
+                                    priceId: "price_1NFOFLHEkeca3H6etn9uECwV"
+                                  })
+                                }
+                              )
+                                .then((res) => res.json())
+                                .then(async (response) => {
+                                  const confirmPayment = await stripe.confirmCardPayment(
+                                    response.clientSecret
+                                  );
+
+                                  if (confirmPayment.error) {
+                                    console.log(confirmPayment.error.message);
+                                  } else {
+                                    updateDoc(
+                                      doc(
+                                        firestore,
+                                        "userDatas",
+                                        this.props.auth.uid
+                                      ),
+                                      {
+                                        subscriptionId: response.subscription
+                                      }
+                                    );
+                                    window.alert(
+                                      "Success! Check your email for the invoice. " +
+                                        "You can now add QuickBooks purchases through QuickNet."
+                                    );
+                                  }
+                                });
+                            }}
+                          >
+                            {/*<CardComponent
+                        style={{ width: "100%" }}
+                        ref={this.cardRef}
+                        onChange={this.onChange}
+                      >
+                        <CardNumber />
+                        <CardExpiry />
+                        <CardCVV />
+                      </CardComponent>*/}
+                            $40 per month
+                            <input
+                              placeholder="Name"
+                              type="text"
+                              value={this.state.name}
+                              onChange={(e) =>
+                                this.setState({ name: e.target.value })
+                              }
+                            />
+                            <br />
+                            <input
+                              placeholder="Email"
+                              type="text"
+                              value={this.state.email}
+                              onChange={(e) =>
+                                this.setState({ email: e.target.value })
+                              }
+                            />
+                            <CardElement stripe={stripe} elements={elements} />
+                            <button type="submit">Submit</button>
+                          </form>
+                        )}
+                      </ElementsConsumer>
+                    </Elements>
+                  )}
+                </td>
+              </tr>
+            </thead>
             <tbody>
               {[
                 ...this.state
@@ -590,6 +723,19 @@ class Application extends React.Component {
                                 return window.alert(
                                   "please choose a customer AND account"
                                 );
+                              if (!this.props.user.subscriptionId) {
+                                window.Chargebee.init({
+                                  site: "quicknet",
+                                  publishableKey:
+                                    "test_Rvan90hQVJaEGMV5QHAeJRd4Cc5OqHr2"
+                                });
+                                var answer = window.confirm(
+                                  "Would you like to subscribe?"
+                                );
+                                if (answer)
+                                  this.setState({ newSubscription: true });
+                                return null;
+                              }
                               //purchase or delete from quickbooks
                               const purchase = {
                                 paymentType: "CreditCard",
