@@ -759,7 +759,7 @@ class Application extends React.Component {
                   .catch(standardCatch);
               }}
             >
-              {!this.props.user.subscriptionId
+              {this.props.user !== undefined && !this.props.user.subscriptionId
                 ? "Use a sample bank account to proceed"
                 : "Connect your bank account"}
             </div>
