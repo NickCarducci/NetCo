@@ -759,8 +759,16 @@ class Application extends React.Component {
                   .catch(standardCatch);
               }}
             >
-              Connect your bank account
+              {!this.props.user.subscriptionId
+                ? "Use a sample bank account to proceed"
+                : "Connect your bank account"}
             </div>
+          )}
+          {!this.props.user.subscriptionId && (
+            <i>
+              Sign into any bank with 'user_good', 'pass_good', and any SMS
+              code.
+            </i>
           )}
           <form onSubmit={(e) => e.preventDefault()}>
             {this.props.user !== undefined &&
@@ -771,6 +779,7 @@ class Application extends React.Component {
                     x={x}
                     key={i}
                     auth={this.props.auth}
+                    user={this.props.user}
                     listTransactions={async (x) => {
                       this.setState({ selectedItem: x });
                     }}
