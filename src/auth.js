@@ -533,7 +533,7 @@ class Auth extends React.Component {
           <b onClick={() => this.props.navigate("/terms")}>terms</b>
           {space}|{space}
           <b onClick={() => this.props.navigate("/privacy")}>privacy</b>
-          {space}
+          {space}|{space}nick@quick.net.co
         </span>
         <h2>Connect to QuickBooks to get started right away.</h2>
         Reconcile purchases in the same view as your bank and card transactions.

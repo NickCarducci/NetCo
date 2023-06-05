@@ -28,6 +28,329 @@ const stripePromise = loadStripe(
 );
 const firestore = getFirestore(firebase);
 
+class Line extends React.Component {
+  state = {
+    chosenAccount: { Name: "accounts" },
+    chosenCustomer: { DisplayName: "customers" },
+    chosenVendor: { DisplayName: "customers" },
+    chosenBank: { Name: "banks" }
+  };
+  render() {
+    const { x } = this.props;
+    const amount = x.TotalAmt ? x.TotalAmt : x.amount;
+    const date = x.MetaData
+      ? new Date(x.MetaData.CreateTime).toLocaleDateString()
+      : x.date; //x.Date
+    const name = x.EntityRef //x.DisplayName
+      ? x.EntityRef.name
+      : x.merchant_name
+      ? x.merchant_name
+      : x.name;
+    return (
+      <tr>
+        <td>
+          {!x.MetaData && (
+            <div
+              onClick={async () => {
+                if (!this.state.chosenCustomer || !this.state.chosenAccount)
+                  return window.alert("please choose a customer AND account");
+                if (!this.props.user.subscriptionId) {
+                  /*window.Chargebee.init({
+                site: "quicknet",
+                publishableKey:
+                  "test_Rvan90hQVJaEGMV5QHAeJRd4Cc5OqHr2"
+              });*/
+                  var answer = window.confirm("Would you like to subscribe?");
+                  if (answer) this.setState({ newSubscription: true });
+                  return null;
+                }
+                if (!this.state.chosenVendor.Id)
+                  return window.alert(
+                    "You must select a vendor-entity from the dropdown menu."
+                  );
+                //purchase or delete from quickbooks
+                const purchase = {
+                  PaymentType: "CreditCard",
+                  AccountRef: {
+                    value: this.state.chosenBank.Id,
+                    name: this.state.chosenBank.Name
+                  },
+                  Line: [
+                    {
+                      DetailType: "AccountBasedExpenseLineDetail",
+                      Amount: x.amount,
+                      AccountBasedExpenseLineDetail: {
+                        AccountRef: {
+                          value: this.state.chosenAccount.Id,
+                          name: this.state.chosenAccount.Name
+                        },
+                        CustomerRef: {
+                          value: this.state.chosenCustomer.Id,
+                          name: this.state.chosenCustomer.DisplayName
+                        }
+                      }
+                    }
+                  ],
+                  CurrencyRef: { value: "USD" },
+                  EntityRef: {
+                    value: this.state.chosenVendor.Id,
+                    name: this.state.chosenVendor.DisplayName,
+                    type: "Vendor"
+                  }
+                };
+                await fetch(
+                  "https://sea-turtle-app-cg9u4.ondigitalocean.app/addpurchase",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Access-Control-Request-Method": "POST",
+                      "Access-Control-Request-Headers": [
+                        "Origin",
+                        "Content-Type"
+                      ], //allow referer
+                      "Content-Type": "Application/JSON"
+                    },
+                    body: JSON.stringify({
+                      companyIDToken: this.props.selectedQuickbooks,
+                      purchase
+                    })
+                  }
+                ) //stripe account, not plaid access token payout yet
+                  .then(async (res) => await res.json())
+                  .then(async (result) => {
+                    if (result.status) return console.log(result);
+                    if (result.error) return console.log(result);
+                    if (!result.transactions)
+                      return console.log("dev error (Cash)", result);
+                  });
+              }}
+              style={{
+                width: "30px",
+                height: "20px",
+                display: "flex",
+                alignItems: "center",
+                borderRadius: "15px",
+                border: "1px solid"
+              }}
+            >
+              <div
+                style={{
+                  transform: `translateX(${
+                    x.Line &&
+                    x.Line[0].AccountBasedExpenseLineDetail &&
+                    x.Line[0].AccountBasedExpenseLineDetail.CustomerRef
+                      ? "0px"
+                      : "10px"
+                  })`,
+                  margin: "0px 3px",
+                  width: "13px",
+                  height: "13px",
+                  borderRadius: "10px",
+                  border: "1px solid",
+                  backgroundColor: "yellowgreen"
+                }}
+              ></div>
+            </div>
+          )}
+        </td>
+        <td>{amount}</td>
+        <td>
+          {!x.MetaData ? (
+            <select
+              style={{ width: "80px" }}
+              value={this.state.chosenVendor.DisplayName}
+              onChange={(e) =>
+                this.setState({
+                  chosenVendor: x
+                })
+              }
+            >
+              {[{ DisplayName: name }, ...this.props.vendors].map((y, i) => {
+                return <option key={i}>{y.DisplayName}</option>;
+              })}
+            </select>
+          ) : (
+            <div
+              style={{
+                height: "20px",
+                position: "relative",
+                overflow: "hidden",
+                width: "80px"
+              }}
+            >
+              <div
+                style={{
+                  height: "40px",
+                  position: "relative",
+                  overflowX: "auto",
+                  width: "80px"
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    width: "max-content"
+                  }}
+                >
+                  {name}
+                </span>
+              </div>
+            </div> // && name.substring(0, 12)
+          )}
+        </td>
+        <td>
+          {x.MetaData ? (
+            <div
+              style={{
+                height: "20px",
+                position: "relative",
+                overflow: "hidden",
+                width: "80px"
+              }}
+            >
+              <div
+                style={{
+                  height: "40px",
+                  position: "relative",
+                  overflowX: "auto",
+                  width: "80px"
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    width: "max-content"
+                  }}
+                >
+                  {x.AccountRef && x.AccountRef.name}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <select
+              style={{ width: "80px" }}
+              value={this.state.chosenBank.Name}
+              onChange={(e) =>
+                this.setState({
+                  chosenBank: x
+                })
+              }
+            >
+              {[{ Name: "banks" }, ...this.props.banks].map((x, i) => (
+                <option key={i}>{x.Name}</option>
+              ))}
+            </select>
+          )}
+        </td>
+        <td>
+          {x.MetaData ? (
+            <div
+              style={{
+                height: "20px",
+                position: "relative",
+                overflow: "hidden",
+                width: "80px"
+              }}
+            >
+              <div
+                style={{
+                  height: "40px",
+                  position: "relative",
+                  overflowX: "auto",
+                  width: "80px"
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    width: "max-content"
+                  }}
+                >
+                  {x.Line &&
+                    x.Line[0].AccountBasedExpenseLineDetail &&
+                    x.Line[0].AccountBasedExpenseLineDetail.AccountRef &&
+                    x.Line[0].AccountBasedExpenseLineDetail.AccountRef.name}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <select
+              style={{ width: "80px" }}
+              value={this.state.chosenAccount.Name}
+              onChange={(e) =>
+                this.setState({
+                  chosenAccount: x
+                })
+              }
+            >
+              {[{ Name: "accounts" }, ...this.props.accounts].map((x, i) => (
+                <option key={i}>{x.Name}</option>
+              ))}
+            </select>
+          )}
+        </td>
+        <td>{date}</td>
+        <td>
+          {x.MetaData ? (
+            <div
+              style={{
+                height: "20px",
+                position: "relative",
+                overflow: "hidden",
+                width: "80px"
+              }}
+            >
+              <div
+                style={{
+                  height: "40px",
+                  position: "relative",
+                  overflowX: "auto",
+                  width: "80px"
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    width: "max-content"
+                  }}
+                >
+                  {x.Line &&
+                    x.Line[0].AccountBasedExpenseLineDetail &&
+                    x.Line[0].AccountBasedExpenseLineDetail.CustomerRef &&
+                    x.Line[0].AccountBasedExpenseLineDetail.CustomerRef.name}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <select
+              style={{ width: "80px" }}
+              value={this.state.chosenCustomer.DisplayName}
+              onChange={(e) =>
+                this.setState({
+                  chosenCustomer: x
+                })
+              }
+            >
+              {[{ DisplayName: "customers" }, ...this.props.customers].map(
+                (x, i) => {
+                  /*if (
+              !x.Line ||
+              !x.Line[0].AccountBasedExpenseLineDetail
+                .CustomerRef ||
+              x.Line[0].AccountBasedExpenseLineDetail
+                .CustomerRef.name === y.DisplayName
+            ) {*/
+                  return <option key={i}>{x.DisplayName}</option>;
+                }
+              )}
+            </select>
+          )}
+        </td>
+      </tr>
+    );
+  }
+}
+
 class Account extends React.Component {
   state = {};
   render() {
@@ -158,9 +481,7 @@ class Application extends React.Component {
       vendors: [],
       customers: [],
       banks: [],
-      date: new Date(),
-      chosenAccount: "accounts",
-      chosenCustomer: "customers"
+      date: new Date()
     };
   }
   componentDidUpdate = async (prevProps) => {
@@ -284,11 +605,14 @@ class Application extends React.Component {
                             (x) => x.Classification === "Expense"
                           );
                           const banks = accountss.QueryResponse.Account.filter(
-                            (x) => x.Classification === "Bank"
+                            (x) =>
+                              !["Expense", "Asset", "Revenue"].includes(
+                                x.Classification
+                              )
                           );
                           const vendors = JSON.parse(result.vendors.body);
                           const customers = JSON.parse(result.customers.body);
-                          console.log(x, accounts, vendors);
+                          console.log(x, accounts, vendors, banks);
                           this.setState({
                             selectedQuickbooks: x,
                             vendors: vendors.QueryResponse.Vendor,
@@ -685,275 +1009,17 @@ class Application extends React.Component {
                   return date(b) - date(a);
                 })
                 .map((x, i) => {
-                  const amount = x.TotalAmt ? x.TotalAmt : x.amount;
-                  const date = x.MetaData
-                    ? new Date(x.MetaData.CreateTime).toLocaleDateString()
-                    : x.date; //x.Date
-                  const name = x.EntityRef //x.DisplayName
-                    ? x.EntityRef.name
-                    : x.merchant_name
-                    ? x.merchant_name
-                    : x.name;
                   return (
-                    <tr key={i}>
-                      <td>
-                        {!x.MetaData && (
-                          <div
-                            onClick={async () => {
-                              if (
-                                !this.state.chosenCustomer ||
-                                !this.state.chosenAccount
-                              )
-                                return window.alert(
-                                  "please choose a customer AND account"
-                                );
-                              if (!this.props.user.subscriptionId) {
-                                /*window.Chargebee.init({
-                                  site: "quicknet",
-                                  publishableKey:
-                                    "test_Rvan90hQVJaEGMV5QHAeJRd4Cc5OqHr2"
-                                });*/
-                                var answer = window.confirm(
-                                  "Would you like to subscribe?"
-                                );
-                                if (answer)
-                                  this.setState({ newSubscription: true });
-                                return null;
-                              }
-                              //purchase or delete from quickbooks
-                              const purchase = {
-                                paymentType: "CreditCard",
-                                AccountRef: this.state.chosenAccount,
-                                Line: [
-                                  {
-                                    DetailType: "AccountBasedExpenseLineDetail",
-                                    Amount: x.amount,
-                                    AccountBasedExpenseLineDetail: {
-                                      AccountRef: this.state.chosenAccount,
-                                      CustomerRef: this.state.chosenCustomer
-                                    }
-                                  }
-                                ],
-                                CurrencyRef: { value: "USD" }
-                              };
-                              await fetch(
-                                "https://sea-turtle-app-cg9u4.ondigitalocean.app/addpurchase",
-                                {
-                                  method: "POST",
-                                  headers: {
-                                    "Access-Control-Request-Method": "POST",
-                                    "Access-Control-Request-Headers": [
-                                      "Origin",
-                                      "Content-Type"
-                                    ], //allow referer
-                                    "Content-Type": "Application/JSON"
-                                  },
-                                  body: JSON.stringify({
-                                    companyIDToken: this.state
-                                      .selectedQuickbooks,
-                                    purchase
-                                  })
-                                }
-                              ) //stripe account, not plaid access token payout yet
-                                .then(async (res) => await res.json())
-                                .then(async (result) => {
-                                  if (result.status) return console.log(result);
-                                  if (result.error) return console.log(result);
-                                  if (!result.transactions)
-                                    return console.log(
-                                      "dev error (Cash)",
-                                      result
-                                    );
-                                });
-                            }}
-                            style={{
-                              width: "30px",
-                              height: "20px",
-                              display: "flex",
-                              alignItems: "center",
-                              borderRadius: "15px",
-                              border: "1px solid"
-                            }}
-                          >
-                            <div
-                              style={{
-                                transform: `translateX(${
-                                  x.Line &&
-                                  x.Line[0].AccountBasedExpenseLineDetail &&
-                                  x.Line[0].AccountBasedExpenseLineDetail
-                                    .CustomerRef
-                                    ? "0px"
-                                    : "10px"
-                                })`,
-                                margin: "0px 3px",
-                                width: "13px",
-                                height: "13px",
-                                borderRadius: "10px",
-                                border: "1px solid",
-                                backgroundColor: "yellowgreen"
-                              }}
-                            ></div>
-                          </div>
-                        )}
-                      </td>
-                      <td>{amount}</td>
-                      <td>
-                        {!x.MetaData ? (
-                          <select style={{ width: "80px" }}>
-                            {[{ DisplayName: name }, ...this.state.vendors].map(
-                              (y, i) => {
-                                return <option key={i}>{y.DisplayName}</option>;
-                              }
-                            )}
-                          </select>
-                        ) : (
-                          <div
-                            style={{
-                              height: "20px",
-                              position: "relative",
-                              overflow: "hidden",
-                              width: "80px"
-                            }}
-                          >
-                            <div
-                              style={{
-                                height: "40px",
-                                position: "relative",
-                                overflowX: "auto",
-                                width: "80px"
-                              }}
-                            >
-                              <span
-                                style={{
-                                  position: "absolute",
-                                  width: "max-content"
-                                }}
-                              >
-                                {name}
-                              </span>
-                            </div>
-                          </div> // && name.substring(0, 12)
-                        )}
-                      </td>
-                      <td>
-                        {["payout", "charge", "issuing_transaction"].includes(
-                          x.type
-                        )
-                          ? "-"
-                          : ""}
-                      </td>
-                      <td>
-                        {x.MetaData ? (
-                          <div
-                            style={{
-                              height: "20px",
-                              position: "relative",
-                              overflow: "hidden",
-                              width: "80px"
-                            }}
-                          >
-                            <div
-                              style={{
-                                height: "40px",
-                                position: "relative",
-                                overflowX: "auto",
-                                width: "80px"
-                              }}
-                            >
-                              <span
-                                style={{
-                                  position: "absolute",
-                                  width: "max-content"
-                                }}
-                              >
-                                {x.Line &&
-                                  x.Line[0].AccountBasedExpenseLineDetail &&
-                                  x.Line[0].AccountBasedExpenseLineDetail
-                                    .AccountRef &&
-                                  x.Line[0].AccountBasedExpenseLineDetail
-                                    .AccountRef.name}
-                              </span>
-                            </div>
-                          </div>
-                        ) : (
-                          <select
-                            style={{ width: "80px" }}
-                            value={this.state.chosenAccount}
-                            onChange={(e) =>
-                              this.setState({
-                                chosenAccount: x.Name
-                              })
-                            }
-                          >
-                            {[{ Name: "accounts" }, ...this.state.accounts].map(
-                              (x, i) => (
-                                <option key={i}>{x.Name}</option>
-                              )
-                            )}
-                          </select>
-                        )}
-                      </td>
-                      <td>{date}</td>
-                      <td>
-                        {x.MetaData ? (
-                          <div
-                            style={{
-                              height: "20px",
-                              position: "relative",
-                              overflow: "hidden",
-                              width: "80px"
-                            }}
-                          >
-                            <div
-                              style={{
-                                height: "40px",
-                                position: "relative",
-                                overflowX: "auto",
-                                width: "80px"
-                              }}
-                            >
-                              <span
-                                style={{
-                                  position: "absolute",
-                                  width: "max-content"
-                                }}
-                              >
-                                {x.Line &&
-                                  x.Line[0].AccountBasedExpenseLineDetail &&
-                                  x.Line[0].AccountBasedExpenseLineDetail
-                                    .CustomerRef &&
-                                  x.Line[0].AccountBasedExpenseLineDetail
-                                    .CustomerRef.name}
-                              </span>
-                            </div>
-                          </div>
-                        ) : (
-                          <select
-                            style={{ width: "80px" }}
-                            value={this.state.chosenCustomer}
-                            onChange={(e) =>
-                              this.setState({
-                                chosenCustomer: x.DisplayName
-                              })
-                            }
-                          >
-                            {[
-                              { DisplayName: "customers" },
-                              ...this.state.customers
-                            ].map((x, i) => {
-                              /*if (
-                                !x.Line ||
-                                !x.Line[0].AccountBasedExpenseLineDetail
-                                  .CustomerRef ||
-                                x.Line[0].AccountBasedExpenseLineDetail
-                                  .CustomerRef.name === y.DisplayName
-                              ) {*/
-                              return <option key={i}>{x.DisplayName}</option>;
-                            })}
-                          </select>
-                        )}
-                      </td>
-                    </tr>
+                    <Line
+                      key={i}
+                      x={x}
+                      selectedQuickbooks={this.state.selectedQuickbooks}
+                      user={this.props.user}
+                      accounts={this.state.accounts}
+                      vendors={this.state.vendors}
+                      customers={this.state.customers}
+                      banks={this.state.banks}
+                    />
                   );
                 })}
             </tbody>
