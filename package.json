@@ -6,6 +6,9 @@
   "main": "src/index.js",
   "license": "UNLICENSED",
   "dependencies": {
+    "@chargebee/chargebee-js-react-wrapper": "0.6.3",
+    "@stripe/react-stripe-js": "2.1.0",
+    "@stripe/stripe-js": "1.54.0",
     "exenv": "^1.2.2",
     "firebase": "9.22.1",
     "pouchdb": "^7.2.2",
