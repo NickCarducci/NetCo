@@ -24,7 +24,8 @@ import firebase from ".././init-firebase.js";
 import { loadStripe } from "@stripe/stripe-js";
 
 const stripePromise = loadStripe(
-  "pk_test_51NFO1VHEkeca3H6eVJIo4umZBpLD7RLRZNr1Egh1ZzGRZg5fmDYRnawm4x65cr8JMusAgvrUx2C7MqHWZiEnWqMH00iAT6aJFd"
+  //"pk_test_51NFO1VHEkeca3H6eVJIo4umZBpLD7RLRZNr1Egh1ZzGRZg5fmDYRnawm4x65cr8JMusAgvrUx2C7MqHWZiEnWqMH00iAT6aJFd"
+  "pk_live_51NFO1VHEkeca3H6ey7snMDyiG1YdbhrsgFE2xIHeYLUO87YNDlTFxqlxLDy1bDUvGoNWQwpiLuQ3QmR0reLtvpMr005LiIXtNB"
 );
 const firestore = getFirestore(firebase);
 
