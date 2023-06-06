@@ -512,11 +512,15 @@ class Application extends React.Component {
               return console.log("dev error (Cash)", result);
             console.log("companyID", result.companyIDToken, this.props.auth);
 
-            (getDoc(doc(firestore, "userDatas", this.props.auth.uid)).exists()
-              ? updateDoc
-              : setDoc)(doc(firestore, "userDatas", this.props.auth.uid), {
-              quickbooks: arrayUnion(result.companyIDToken)
-            }).then(() => {
+            const userData = await getDoc(
+              doc(firestore, "userDatas", this.props.auth.uid)
+            );
+            (userData.exists() ? updateDoc : setDoc)(
+              doc(firestore, "userDatas", this.props.auth.uid),
+              {
+                quickbooks: arrayUnion(result.companyIDToken)
+              }
+            ).then(() => {
               this.props.navigate("/");
             });
           })
@@ -535,11 +539,15 @@ class Application extends React.Component {
         <div style={{ margin: 5 }}>
           <div
             onClick={async () => {
-              (getDoc(doc(firestore, "userDatas", this.props.auth.uid)).exists()
-                ? updateDoc
-                : setDoc)(doc(firestore, "userDatas", this.props.auth.uid), {
-                quickbooks: []
-              });
+              const userData = await getDoc(
+                doc(firestore, "userDatas", this.props.auth.uid)
+              );
+              (userData.exists() ? updateDoc : setDoc)(
+                doc(firestore, "userDatas", this.props.auth.uid),
+                {
+                  quickbooks: []
+                }
+              );
               await fetch(
                 "https://sea-turtle-app-cg9u4.ondigitalocean.app/quickbooks",
                 {
@@ -713,7 +721,10 @@ class Application extends React.Component {
                     if (!result.access_token)
                       return console.log("dev error (Cash)", result);
                     console.log("access_token", result.access_token);
-                    updateDoc(
+                    const userData = await getDoc(
+                      doc(firestore, "userDatas", this.props.auth.uid)
+                    );
+                    (userData.exists() ? updateDoc : setDoc)(
                       doc(firestore, "userDatas", this.props.auth.uid),
                       {
                         accessTokens: arrayUnion(result.access_token)
