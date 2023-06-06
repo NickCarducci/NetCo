@@ -17,7 +17,9 @@ import {
   arrayRemove,
   arrayUnion,
   doc,
+  getDoc,
   getFirestore,
+  setDoc,
   updateDoc
 } from "firebase/firestore";
 import firebase from ".././init-firebase.js";
@@ -510,7 +512,9 @@ class Application extends React.Component {
               return console.log("dev error (Cash)", result);
             console.log("companyID", result.companyIDToken, this.props.auth);
 
-            updateDoc(doc(firestore, "userDatas", this.props.auth.uid), {
+            (getDoc(doc(firestore, "userDatas", this.props.auth.uid)).exists()
+              ? updateDoc
+              : setDoc)(doc(firestore, "userDatas", this.props.auth.uid), {
               quickbooks: arrayUnion(result.companyIDToken)
             }).then(() => {
               this.props.navigate("/");
@@ -531,7 +535,9 @@ class Application extends React.Component {
         <div style={{ margin: 5 }}>
           <div
             onClick={async () => {
-              updateDoc(doc(firestore, "userDatas", this.props.auth.uid), {
+              (getDoc(doc(firestore, "userDatas", this.props.auth.uid)).exists()
+                ? updateDoc
+                : setDoc)(doc(firestore, "userDatas", this.props.auth.uid), {
                 quickbooks: []
               });
               await fetch(

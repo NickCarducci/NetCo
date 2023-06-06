@@ -5,7 +5,8 @@ import {
   doc,
   onSnapshot,
   query,
-  where
+  where,
+  arrayUnion
 } from "firebase/firestore";
 import firebase from "./init-firebase.js";
 import PromptAuth from "./PromptAuth.js"; //default export would require no '{}' braces
@@ -243,64 +244,6 @@ class Auth extends React.Component {
       })
       .catch(standardCatch);
   //How many Italian Americans were fishmongers in the 18th century?
-  addUserDatas = (meAuth, b) => {
-    onSnapshot(
-      doc(firestore, "userDatas", meAuth.uid),
-      (doc) => {
-        var userDatas = undefined;
-        if (doc.exists) {
-          userDatas = doc.data();
-          if (userDatas.email && userDatas.email === meAuth.email) {
-            userDatas.doc(meAuth.uid).update({
-              email: null,
-              confirmedEmails: firebase.firestore.FieldValue.arrayUnion(
-                meAuth.email
-              ),
-              defaultEmail: userDatas.defaultEmail
-                ? userDatas.defaultEmail
-                : meAuth.email
-            });
-            b.email = null;
-          }
-          if (userDatas.banked)
-            onSnapshot(
-              query(
-                collection(firestore, "banks"),
-                where("owner", "==", meAuth.uid)
-              ),
-              (querySnapshot) => {
-                let q = 0;
-                let banks = [];
-                querySnapshot.docs.forEach((doc) => {
-                  q++;
-                  if (doc.exists) {
-                    var bank = doc.data();
-                    bank.id = doc.id;
-                    banks.push(bank);
-                  }
-                });
-                if (querySnapshot.docs.length === q) {
-                  userDatas.banks = banks;
-                }
-              },
-              standardCatch
-            );
-
-          if (this.state.userDatas !== userDatas) {
-            delete b.defaultEmail;
-            this.setState(
-              {
-                user: { ...b, ...userDatas },
-                userDatas
-              },
-              () => this.getEntities(meAuth)
-            );
-          }
-        }
-      },
-      standardCatch
-    );
-  };
   render() {
     const hiddenUserData = (ath) => {
         //console.log("hiddenuserdata");
@@ -311,18 +254,6 @@ class Auth extends React.Component {
             if (doc.exists()) {
               var u = this.state.user;
               userDatas = doc.data(); //{...,doc.id}
-              if (userDatas.email && userDatas.email === ath.email) {
-                userDatas.doc(ath.uid).update({
-                  email: null,
-                  confirmedEmails: firebase.firestore.FieldValue.arrayUnion(
-                    ath.email
-                  ),
-                  defaultEmail: userDatas.defaultEmail
-                    ? userDatas.defaultEmail
-                    : ath.email
-                });
-                u.email = null;
-              }
 
               //delete u.defaultEmail;
               const user = {
@@ -449,16 +380,16 @@ class Auth extends React.Component {
             forbiddenUsernames={forbiddenUsernames}
             phoneNumberCollection={"phoneNumbers"}
             width={this.props.width}
-            rooturi={"https://wavv.art/"} //comment out to use click
-            homeuri={"https://wavv.art"} // emulateRoot onroot instead
+            rooturi={"https://quick.net.co/"} //comment out to use click
+            homeuri={"https://quick.net.co"} // emulateRoot onroot instead
             logoutofapp={this.props.logoutofapp}
             auth={meAuth}
             lastWidth={this.props.lastWidth}
             availableHeight={this.props.appHeight}
             backgroundColor={null} //transparent
             position={"relative"}
-            supportemail={"nick@thumbprint.us"}
-            welcomeName={"Thumbprint.us - Social Calendar"}
+            supportemail={"nick@quick.net.co"}
+            welcomeName={"QuickNet - Bookkeeping facility"}
             onroot={true}
             emulateRoot={(e) => this.setState(e)}
             getUserInfo={() => this.gui.current.click()}
