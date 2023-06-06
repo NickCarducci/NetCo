@@ -526,7 +526,8 @@ class Application extends React.Component {
     const stripeaccount = this.state.banks.find((x) => x);
     //console.log(this.props.auth);
     return (
-      this.props.auth !== undefined && (
+      this.props.auth !== undefined &&
+      this.props.user !== undefined && (
         <div style={{ margin: 5 }}>
           <div
             onClick={async () => {
