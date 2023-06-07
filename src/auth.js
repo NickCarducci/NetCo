@@ -466,24 +466,29 @@ class Auth extends React.Component {
           <b onClick={() => this.props.navigate("/privacy")}>privacy</b>
           {space}|{space}nick@quick.net.co
         </span>
-        <h2>Connect to QuickBooks to get started right away.</h2>
+        <h2>
+          Connect to QuickBooks to get started right away.
+          {meAuth !== undefined && (
+            <button
+              onClick={() => logoutofapp()}
+              style={{
+                wordWrap: "unset",
+                width: "max-content",
+                border: "1px solid",
+                borderRadius: "2px",
+                padding: "3px 6px"
+              }}
+            >
+              logout of app (
+              {this.state.user !== undefined && this.state.user.username})
+            </button>
+          )}
+        </h2>
         Reconcile purchases in the same view as your bank and card transactions.
         {
           space
           /**Scopebook keeps track of expenses with issuable cards. */
         }
-        {meAuth !== undefined && (
-          <span
-            onClick={() => logoutofapp()}
-            style={{
-              border: "1px solid",
-              borderRadius: "2px",
-              padding: "3px 6px"
-            }}
-          >
-            logout of app
-          </span>
-        )}
         <Application
           auth={meAuth}
           width={this.props.width}

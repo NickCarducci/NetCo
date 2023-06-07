@@ -537,7 +537,7 @@ class Application extends React.Component {
       this.props.auth !== undefined &&
       this.props.user !== undefined && (
         <div style={{ margin: 5 }}>
-          <div
+          <button
             onClick={async () => {
               const userData = await getDoc(
                 doc(firestore, "userDatas", this.props.auth.uid)
@@ -576,7 +576,7 @@ class Application extends React.Component {
             }}
           >
             Sign in with Quickbooks
-          </div>
+          </button>
 
           {this.props.user !== undefined &&
             this.props.user.quickbooks &&
@@ -754,7 +754,8 @@ class Application extends React.Component {
               )}
             </PlaidLink>
           ) : (
-            <div
+            <button
+              style={{ margin: "4px 0px" }}
               onClick={async () => {
                 await fetch(
                   "https://sea-turtle-app-cg9u4.ondigitalocean.app/link",
@@ -787,7 +788,7 @@ class Application extends React.Component {
               {!this.props.user.subscriptionId
                 ? "Use a sample bank account to proceed"
                 : "Connect your bank account"}
-            </div>
+            </button>
           )}
           <form onSubmit={(e) => e.preventDefault()}>
             {this.props.user !== undefined &&
