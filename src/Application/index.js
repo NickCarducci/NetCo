@@ -713,7 +713,7 @@ class Application extends React.Component {
                           });
                         //https://www.mohammadfaisal.dev/blog/how-to-create-a-stripe-subscription-with-reactjs-and-nodejs
                         await fetch(
-                          "http://sea-turtle-app-cg9u4.ondigitalocean.app/subscribe",
+                          "https://sea-turtle-app-cg9u4.ondigitalocean.app/subscribe",
                           {
                             method: "POST",
                             headers: {
@@ -723,7 +723,7 @@ class Application extends React.Component {
                               paymentMethod: paymentMethod.paymentMethod.id,
                               name,
                               email,
-                              priceId: "price_1NGVOOHEkeca3H6eGeRZyooR" //"price_1NFOFLHEkeca3H6etn9uECwV"
+                              priceId: "price_1NFOFLHEkeca3H6etn9uECwV"
                             })
                           }
                         )

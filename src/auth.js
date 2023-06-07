@@ -6,7 +6,9 @@ import {
   onSnapshot,
   query,
   where,
-  arrayUnion
+  arrayUnion,
+  updateDoc,
+  deleteField
 } from "firebase/firestore";
 import firebase from "./init-firebase.js";
 import PromptAuth from "./PromptAuth.js"; //default export would require no '{}' braces
@@ -455,8 +457,11 @@ class Auth extends React.Component {
                     .then(async (result) => {
                       if (result.status) return console.log(result);
                       if (result.error) return console.log(result);
-                      if (!result.transactions)
+                      if (!result.subscription)
                         return console.log("dev error (Cash)", result);
+                      updateDoc(doc(firestore, "userDatas", meAuth.uid), {
+                        subscriptionId: deleteField()
+                      });
                     }));
               }}
             ></div>
