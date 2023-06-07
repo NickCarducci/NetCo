@@ -744,7 +744,14 @@ class Application extends React.Component {
                 console.log(error, metadata);
               }}
             >
-              Load bank plaidTransactions
+              {!this.props.user.subscriptionId ? (
+                <i>
+                  Sign into any bank with 'user_good', 'pass_good', and any SMS
+                  code.
+                </i>
+              ) : (
+                "Load bank plaidTransactions"
+              )}
             </PlaidLink>
           ) : (
             <div
@@ -777,16 +784,10 @@ class Application extends React.Component {
                   .catch(standardCatch);
               }}
             >
-              {this.props.user !== undefined && !this.props.user.subscriptionId
+              {!this.props.user.subscriptionId
                 ? "Use a sample bank account to proceed"
                 : "Connect your bank account"}
             </div>
-          )}
-          {!this.props.user.subscriptionId && (
-            <i>
-              Sign into any bank with 'user_good', 'pass_good', and any SMS
-              code.
-            </i>
           )}
           <form onSubmit={(e) => e.preventDefault()}>
             {this.props.user !== undefined &&
