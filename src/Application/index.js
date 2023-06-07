@@ -723,7 +723,7 @@ class Application extends React.Component {
                               paymentMethod: paymentMethod.paymentMethod.id,
                               name,
                               email,
-                              priceId: "price_1NFOFLHEkeca3H6etn9uECwV"
+                              priceId: "price_1NGVOOHEkeca3H6eGeRZyooR" //"price_1NFOFLHEkeca3H6etn9uECwV"
                             })
                           }
                         )
