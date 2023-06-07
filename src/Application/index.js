@@ -533,6 +533,10 @@ class Application extends React.Component {
     //console.log(this.state.banks);
     const stripeaccount = this.state.banks.find((x) => x);
     //console.log(this.props.auth);
+    const quickbooks =
+      this.props.user !== undefined &&
+      this.props.user.quickbooks &&
+      this.props.user.quickbooks.length > 0;
     return (
       this.props.auth !== undefined &&
       this.props.user !== undefined && (
@@ -687,7 +691,107 @@ class Application extends React.Component {
                 </div>
               );
             })}
-          {this.state.plaid_link ? (
+          {quickbooks &&
+            //this.state.newSubscription &&
+            !this.props.user.subscriptionId && (
+              <Elements stripe={stripePromise}>
+                <ElementsConsumer>
+                  {({ stripe, elements }) => (
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        //this.cardRef.current.tokenize().then((data) =>
+                        //{console.log("chargebee token", data.token);});
+                        const { email, name } = this.state,
+                          paymentMethod = await stripe.createPaymentMethod({
+                            type: "card",
+                            card: elements.getElement(CardElement),
+                            billing_details: {
+                              name,
+                              email
+                            }
+                          });
+                        //https://www.mohammadfaisal.dev/blog/how-to-create-a-stripe-subscription-with-reactjs-and-nodejs
+                        await fetch(
+                          "http://sea-turtle-app-cg9u4.ondigitalocean.app/subscribe",
+                          {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                              paymentMethod: paymentMethod.paymentMethod.id,
+                              name,
+                              email,
+                              priceId: "price_1NFOFLHEkeca3H6etn9uECwV"
+                            })
+                          }
+                        )
+                          .then((res) => res.json())
+                          .then(async (response) => {
+                            const confirmPayment = await stripe.confirmCardPayment(
+                              response.clientSecret
+                            );
+
+                            if (confirmPayment.error) {
+                              console.log(confirmPayment.error.message);
+                            } else {
+                              updateDoc(
+                                doc(
+                                  firestore,
+                                  "userDatas",
+                                  this.props.auth.uid
+                                ),
+                                {
+                                  subscriptionId: response.subscription
+                                }
+                              );
+                              window.alert(
+                                "Success! Check your email for the invoice. " +
+                                  "You can now add QuickBooks purchases through QuickNet."
+                              );
+                            }
+                          });
+                      }}
+                      style={{
+                        maxWidth: "360px"
+                      }}
+                    >
+                      {/*<CardComponent
+                          style={{ width: "100%" }}
+                          ref={this.cardRef}
+                          onChange={this.onChange}
+                        >
+                          <CardNumber />
+                          <CardExpiry />
+                          <CardCVV />
+                        </CardComponent>*/}
+                      <CardElement stripe={stripe} elements={elements} />
+                      <input
+                        placeholder="Name"
+                        type="text"
+                        value={this.state.name}
+                        onChange={(e) =>
+                          this.setState({ name: e.target.value })
+                        }
+                      />
+                      $40 per month
+                      <br />
+                      <input
+                        placeholder="Email"
+                        type="text"
+                        value={this.state.email}
+                        onChange={(e) =>
+                          this.setState({ email: e.target.value })
+                        }
+                      />
+                      <button type="submit">Submit</button>
+                    </form>
+                  )}
+                </ElementsConsumer>
+              </Elements>
+            )}
+          {!quickbooks ? null : this.state.plaid_link ? (
             <PlaidLink
               style={{ padding: "20px", fontSize: "16px", cursor: "pointer" }}
               token={this.state.plaid_link}
@@ -790,24 +894,26 @@ class Application extends React.Component {
                 : "Connect your bank account"}
             </button>
           )}
-          <form onSubmit={(e) => e.preventDefault()}>
-            {this.props.user !== undefined &&
-              this.props.user.accessTokens &&
-              this.props.user.accessTokens.map((x, i) => {
-                return (
-                  <Account
-                    x={x}
-                    key={i}
-                    auth={this.props.auth}
-                    user={this.props.user}
-                    listTransactions={async (x) => {
-                      this.setState({ selectedItem: x });
-                    }}
-                    selectedItem={this.state.selectedItem}
-                  />
-                );
-              })}
-          </form>
+          {quickbooks && (
+            <form onSubmit={(e) => e.preventDefault()}>
+              {this.props.user !== undefined &&
+                this.props.user.accessTokens &&
+                this.props.user.accessTokens.map((x, i) => {
+                  return (
+                    <Account
+                      x={x}
+                      key={i}
+                      auth={this.props.auth}
+                      user={this.props.user}
+                      listTransactions={async (x) => {
+                        this.setState({ selectedItem: x });
+                      }}
+                      selectedItem={this.state.selectedItem}
+                    />
+                  );
+                })}
+            </form>
+          )}
           <hr style={{ margin: "10px" }} />
           <h3
             style={{
@@ -926,93 +1032,6 @@ class Application extends React.Component {
               {this.state.date.toLocaleDateString()}
             </div>
           </h3>
-          {this.state.newSubscription && (
-            <Elements stripe={stripePromise}>
-              <ElementsConsumer>
-                {({ stripe, elements }) => (
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      //this.cardRef.current.tokenize().then((data) =>
-                      //{console.log("chargebee token", data.token);});
-                      const { email, name } = this.state,
-                        paymentMethod = await stripe.createPaymentMethod({
-                          type: "card",
-                          card: elements.getElement(CardElement),
-                          billing_details: {
-                            name,
-                            email
-                          }
-                        });
-                      //https://www.mohammadfaisal.dev/blog/how-to-create-a-stripe-subscription-with-reactjs-and-nodejs
-                      await fetch(
-                        "http://sea-turtle-app-cg9u4.ondigitalocean.app/subscribe",
-                        {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json"
-                          },
-                          body: JSON.stringify({
-                            paymentMethod: paymentMethod.paymentMethod.id,
-                            name,
-                            email,
-                            priceId: "price_1NFOFLHEkeca3H6etn9uECwV"
-                          })
-                        }
-                      )
-                        .then((res) => res.json())
-                        .then(async (response) => {
-                          const confirmPayment = await stripe.confirmCardPayment(
-                            response.clientSecret
-                          );
-
-                          if (confirmPayment.error) {
-                            console.log(confirmPayment.error.message);
-                          } else {
-                            updateDoc(
-                              doc(firestore, "userDatas", this.props.auth.uid),
-                              {
-                                subscriptionId: response.subscription
-                              }
-                            );
-                            window.alert(
-                              "Success! Check your email for the invoice. " +
-                                "You can now add QuickBooks purchases through QuickNet."
-                            );
-                          }
-                        });
-                    }}
-                  >
-                    {/*<CardComponent
-                        style={{ width: "100%" }}
-                        ref={this.cardRef}
-                        onChange={this.onChange}
-                      >
-                        <CardNumber />
-                        <CardExpiry />
-                        <CardCVV />
-                      </CardComponent>*/}
-                    $40 per month
-                    <input
-                      placeholder="Name"
-                      type="text"
-                      value={this.state.name}
-                      onChange={(e) => this.setState({ name: e.target.value })}
-                    />
-                    <br />
-                    <input
-                      placeholder="Email"
-                      type="text"
-                      value={this.state.email}
-                      onChange={(e) => this.setState({ email: e.target.value })}
-                    />
-                    <CardElement stripe={stripe} elements={elements} />
-                    <button type="submit">Submit</button>
-                  </form>
-                )}
-              </ElementsConsumer>
-            </Elements>
-          )}
           <table style={{ color: "grey" }}>
             <thead></thead>
             <tbody>
