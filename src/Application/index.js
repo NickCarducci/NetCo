@@ -821,7 +821,7 @@ class Application extends React.Component {
               }}
               onClick={() => {
                 this.setState({
-                  date: new Date(this.state.date.getTime() - 31556926000)
+                  date: new Date(this.state.date.getTime() - 2629800000)
                 });
               }}
             >
@@ -837,10 +837,10 @@ class Application extends React.Component {
               }}
               onClick={() => {
                 if (
-                  new Date(this.state.date.getTime() + 11556926000) < new Date()
+                  new Date(this.state.date.getTime() + 1329800000) < new Date()
                 )
                   this.setState({
-                    date: new Date(this.state.date.getTime() + 31556926000)
+                    date: new Date(this.state.date.getTime() + 2629800000)
                   });
               }}
             >
