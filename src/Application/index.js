@@ -485,7 +485,7 @@ class Application extends React.Component {
       customers: [],
       banks: [],
       date: new Date(),
-      maxResults: 200
+      offset: 0
     };
   }
   componentDidUpdate = async (prevProps) => {
@@ -614,7 +614,7 @@ class Application extends React.Component {
                             },
                             body: JSON.stringify({
                               companyIDToken: x,
-                              maxResults: this.state.maxResults
+                              offset: this.state.offset
                             })
                           }
                         ) //stripe account, not plaid access token payout yet
@@ -704,16 +704,16 @@ class Application extends React.Component {
                 marginRight: "4px"
               }}
               onClick={() => {
-                const maxResults = this.state.maxResults - 20;
-                maxResults > -1 &&
+                const offset = this.state.offset - 1;
+                offset > -1 &&
                   this.setState({
-                    maxResults
+                    offset
                   });
               }}
             >
               {"<"}
             </div>
-            {this.state.maxResults} rows
+            row {60 * this.state.offset}
             <div
               style={{
                 borderRadius: "6px",
@@ -723,7 +723,7 @@ class Application extends React.Component {
               }}
               onClick={() => {
                 this.setState({
-                  maxResults: this.state.maxResults + 20
+                  offset: this.state.offset + 1
                 });
               }}
             >
