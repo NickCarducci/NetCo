@@ -484,7 +484,8 @@ class Application extends React.Component {
       vendors: [],
       customers: [],
       banks: [],
-      date: new Date()
+      date: new Date(),
+      offset: 0
     };
   }
   componentDidUpdate = async (prevProps) => {
@@ -581,78 +582,26 @@ class Application extends React.Component {
           >
             Sign in with Quickbooks
           </button>
-
-          {this.props.user !== undefined &&
-            this.props.user.quickbooks &&
-            this.props.user.quickbooks.map((x, i) => {
-              return (
-                <div key={i} style={{ display: "flex" }}>
-                  <div
-                    style={{
-                      borderRadius: "6px",
-                      border:
-                        "1px solid " +
-                        (this.state.selectedQuickbooks === x
-                          ? "blue"
-                          : "dimgrey"),
-                      padding: "0px 4px",
-                      marginRight: "4px"
-                    }}
-                    onClick={async () => {
-                      await fetch(
-                        "https://sea-turtle-app-cg9u4.ondigitalocean.app/quickbookscustomer",
-                        {
-                          method: "POST",
-                          headers: {
-                            "Access-Control-Request-Method": "POST",
-                            "Access-Control-Request-Headers": [
-                              "Origin",
-                              "Content-Type"
-                            ], //allow referer
-                            "Content-Type": "Application/JSON"
-                          },
-                          body: JSON.stringify({ companyIDToken: x })
-                        }
-                      ) //stripe account, not plaid access token payout yet
-                        .then(async (res) => await res.json())
-                        .then(async (result) => {
-                          if (result.status) return console.log(result);
-                          if (result.error) return console.log(result);
-                          if (!result.accounts)
-                            return console.log("dev error (Cash)", result);
-                          const accountss = JSON.parse(result.accounts.body);
-                          const accounts = accountss.QueryResponse.Account.filter(
-                            (x) => x.Classification === "Expense"
-                          );
-                          const banks = accountss.QueryResponse.Account.filter(
-                            (x) =>
-                              !["Expense", "Asset", "Revenue"].includes(
-                                x.Classification
-                              )
-                          );
-                          const vendors = JSON.parse(result.vendors.body);
-                          const customers = JSON.parse(result.customers.body);
-                          console.log(x, accounts, vendors, banks);
-                          this.setState({
-                            selectedQuickbooks: x,
-                            vendors: vendors.QueryResponse.Vendor,
-                            accounts, //: accounts.QueryResponse.Account,
-                            customers: customers.QueryResponse.Customer,
-                            banks
-                          });
-                        })
-                        .catch(standardCatch);
-                    }}
-                  >
-                    =
-                  </div>
-                  {this.state.companyInfo ? (
-                    this.state.companyInfo
-                  ) : (
+          <div style={{ display: "flex" }}>
+            {this.props.user !== undefined &&
+              this.props.user.quickbooks &&
+              this.props.user.quickbooks.map((x, i) => {
+                return (
+                  <div key={i} style={{ display: "flex" }}>
                     <div
+                      style={{
+                        borderRadius: "6px",
+                        border:
+                          "1px solid " +
+                          (this.state.selectedQuickbooks === x
+                            ? "blue"
+                            : "dimgrey"),
+                        padding: "0px 4px",
+                        marginRight: "4px"
+                      }}
                       onClick={async () => {
                         await fetch(
-                          "https://sea-turtle-app-cg9u4.ondigitalocean.app/quickbooksinfo",
+                          "https://sea-turtle-app-cg9u4.ondigitalocean.app/quickbookscustomer",
                           {
                             method: "POST",
                             headers: {
@@ -663,34 +612,124 @@ class Application extends React.Component {
                               ], //allow referer
                               "Content-Type": "Application/JSON"
                             },
-                            body: JSON.stringify({ companyIDToken: x })
+                            body: JSON.stringify({
+                              companyIDToken: x,
+                              offset: this.state.offset
+                            })
                           }
                         ) //stripe account, not plaid access token payout yet
                           .then(async (res) => await res.json())
                           .then(async (result) => {
                             if (result.status) return console.log(result);
                             if (result.error) return console.log(result);
-                            if (!result.companyInfo)
+                            if (!result.accounts)
                               return console.log("dev error (Cash)", result);
-                            const companyInfo = JSON.parse(
-                              result.companyInfo.body
+                            const accountss = JSON.parse(result.accounts.body);
+                            const accounts = accountss.QueryResponse.Account.filter(
+                              (x) => x.Classification === "Expense"
                             );
-                            console.log("companyInfo", companyInfo);
+                            const banks = accountss.QueryResponse.Account.filter(
+                              (x) =>
+                                !["Expense", "Asset", "Revenue"].includes(
+                                  x.Classification
+                                )
+                            );
+                            const vendors = JSON.parse(result.vendors.body);
+                            const customers = JSON.parse(result.customers.body);
+                            console.log(x, accounts, vendors, banks);
                             this.setState({
-                              companyInfo:
-                                companyInfo.QueryResponse.CompanyInfo[0]
-                                  .LegalName
+                              selectedQuickbooks: x,
+                              vendors: vendors.QueryResponse.Vendor,
+                              accounts, //: accounts.QueryResponse.Account,
+                              customers: customers.QueryResponse.Customer,
+                              banks
                             });
                           })
                           .catch(standardCatch);
                       }}
                     >
-                      {x.split(":")[0]}
+                      =
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                    {this.state.companyInfo ? (
+                      this.state.companyInfo
+                    ) : (
+                      <div
+                        onClick={async () => {
+                          await fetch(
+                            "https://sea-turtle-app-cg9u4.ondigitalocean.app/quickbooksinfo",
+                            {
+                              method: "POST",
+                              headers: {
+                                "Access-Control-Request-Method": "POST",
+                                "Access-Control-Request-Headers": [
+                                  "Origin",
+                                  "Content-Type"
+                                ], //allow referer
+                                "Content-Type": "Application/JSON"
+                              },
+                              body: JSON.stringify({ companyIDToken: x })
+                            }
+                          ) //stripe account, not plaid access token payout yet
+                            .then(async (res) => await res.json())
+                            .then(async (result) => {
+                              if (result.status) return console.log(result);
+                              if (result.error) return console.log(result);
+                              if (!result.companyInfo)
+                                return console.log("dev error (Cash)", result);
+                              const companyInfo = JSON.parse(
+                                result.companyInfo.body
+                              );
+                              console.log("companyInfo", companyInfo);
+                              this.setState({
+                                companyInfo:
+                                  companyInfo.QueryResponse.CompanyInfo[0]
+                                    .LegalName
+                              });
+                            })
+                            .catch(standardCatch);
+                        }}
+                      >
+                        {x.split(":")[0]}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            <div
+              style={{
+                marginLeft: "20px",
+                borderRadius: "6px",
+                border: "1px solid",
+                padding: "0px 4px",
+                marginRight: "4px"
+              }}
+              onClick={() => {
+                const offset = this.state.offset - 1;
+                offset > -1 &&
+                  this.setState({
+                    offset
+                  });
+              }}
+            >
+              {"<"}
+            </div>
+            row {60 * this.state.offset}
+            <div
+              style={{
+                borderRadius: "6px",
+                border: "1px solid",
+                padding: "0px 4px",
+                marginLeft: "4px"
+              }}
+              onClick={() => {
+                this.setState({
+                  offset: this.state.offset + 1
+                });
+              }}
+            >
+              {">"}
+            </div>
+          </div>
           {quickbooks &&
             //this.state.newSubscription &&
             !this.props.user.subscriptionId && (
@@ -850,7 +889,7 @@ class Application extends React.Component {
             >
               {!this.props.user.subscriptionId ? (
                 <i>
-                  Sign into any bank with 'user_good', 'pass_good', and any SMS
+                  Sign into TD bank with 'user_good' and 'pass_good' or any SMS
                   code.
                 </i>
               ) : (

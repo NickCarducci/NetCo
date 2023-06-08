@@ -466,12 +466,10 @@ class Auth extends React.Component {
                           ))
                       ) {
                         console.log("delete sub id");
-                        return updateDoc(
-                          doc(firestore, "userDatas", meAuth.uid),
-                          {
-                            subscriptionId: deleteField()
-                          }
-                        );
+                        updateDoc(doc(firestore, "userDatas", meAuth.uid), {
+                          subscriptionId: deleteField()
+                        });
+                        return window.location.reload();
                       }
                       console.log("dev error (Cash)", result);
                     }));
