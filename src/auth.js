@@ -456,12 +456,24 @@ class Auth extends React.Component {
                     .then(async (res) => await res.json())
                     .then(async (result) => {
                       if (result.status) return console.log(result);
-                      if (result.error) return console.log(result);
-                      if (!result.subscription)
-                        return console.log("dev error (Cash)", result);
-                      updateDoc(doc(firestore, "userDatas", meAuth.uid), {
-                        subscriptionId: deleteField()
-                      });
+                      if (
+                        result.subscription ||
+                        (result.error &&
+                          result.error.raw &&
+                          result.error.raw.message &&
+                          result.error.raw.message.includes(
+                            "No such subscription: "
+                          ))
+                      ) {
+                        console.log("delete sub id");
+                        return updateDoc(
+                          doc(firestore, "userDatas", meAuth.uid),
+                          {
+                            subscriptionId: deleteField()
+                          }
+                        );
+                      }
+                      console.log("dev error (Cash)", result);
                     }));
               }}
             ></div>
