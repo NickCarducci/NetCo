@@ -636,7 +636,7 @@ class Application extends React.Component {
                             );
                             const vendors = JSON.parse(result.vendors.body);
                             const customers = JSON.parse(result.customers.body);
-                            console.log(x, accounts, vendors, banks);
+                            console.log(result, accounts, vendors, banks);
                             this.setState({
                               selectedQuickbooks: x,
                               vendors: vendors.QueryResponse.Vendor,
@@ -695,7 +695,7 @@ class Application extends React.Component {
                   </div>
                 );
               })}
-            <div
+            {/*<div
               style={{
                 marginLeft: "20px",
                 borderRadius: "6px",
@@ -728,7 +728,7 @@ class Application extends React.Component {
               }}
             >
               {">"}
-            </div>
+            </div>*/}
           </div>
           {quickbooks &&
             //this.state.newSubscription &&
