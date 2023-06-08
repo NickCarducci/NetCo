@@ -695,7 +695,7 @@ class Application extends React.Component {
                   </div>
                 );
               })}
-            {/*<div
+            <div
               style={{
                 marginLeft: "20px",
                 borderRadius: "6px",
@@ -728,7 +728,7 @@ class Application extends React.Component {
               }}
             >
               {">"}
-            </div>*/}
+            </div>
           </div>
           {quickbooks &&
             //this.state.newSubscription &&
