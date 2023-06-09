@@ -449,7 +449,8 @@ class Auth extends React.Component {
                         "Content-Type": "Application/JSON"
                       },
                       body: JSON.stringify({
-                        subscriptionId: this.state.user.subscriptionId
+                        subscriptionId: this.state.user.subscriptionId,
+                        access_tokens: this.state.user.accessTokens
                       })
                     }
                   ) //stripe account, not plaid access token payout yet
