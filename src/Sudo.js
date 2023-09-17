@@ -619,7 +619,6 @@ class FIREBASE_SUDO extends React.Component {
                   "none"
                 : "flex",*/
             flexDirection: "column",
-            justifyContent: "flex-start",
             maxheight: "min-content",
             left: "0%",
             //width: this.props.lastWidth,
@@ -637,23 +636,22 @@ class FIREBASE_SUDO extends React.Component {
           {this.props.auth === undefined
             ? this.props.useTitle && this.props.useTitle
             : this.props.memberMessage}
-          <br />
-          <br />
-          <div
-            style={{
-              position: "relative",
-              margin: "auto",
-              marginBottom: "4px",
-              width: "max-content",
-              borderTopRightRadius: "10px",
-              borderTopLeftRadius: "10px",
-              padding: "16px 4px",
-              backgroundColor: !this.props.backgroundColor
-                ? "rgba(255,255,255,.6)"
-                : ""
-            }}
-          >
-            {this.props.auth !== undefined && ( //this.props.auth!==undefined.sausageadmin
+          {this.props.auth !== undefined && (
+            <div
+              style={{
+                position: "relative",
+                margin: "auto",
+                marginBottom: "4px",
+                width: "max-content",
+                borderTopRightRadius: "10px",
+                borderTopLeftRadius: "10px",
+                padding: "16px 4px",
+                backgroundColor: !this.props.backgroundColor
+                  ? "rgba(255,255,255,.6)"
+                  : "" //this.props.auth!==undefined.sausageadmin
+              }}
+            >
+              (
               <span
                 style={{
                   cursor: "pointer",
@@ -665,8 +663,8 @@ class FIREBASE_SUDO extends React.Component {
               >
                 logout
               </span>
-            )}
-          </div>
+            </div>
+          )}
           {
             //this.state.showRecaptcha && (
             <div
@@ -691,50 +689,39 @@ class FIREBASE_SUDO extends React.Component {
           {this.props.root && this.props.auth !== undefined ? (
             this.props.root(this.props.rootArguments)
           ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-end"
-              }}
-            >
+            <div>
               <div
                 style={{
-                  maxWidth: "80%",
-                  borderTopLeftRadius: "10px",
-                  borderTopRightRadius: "10px",
-                  padding: "10px 0px",
-                  border: "2px solid"
-                  //width: "70%",
-                  //maxWidth: "400px"
+                  padding: "10px",
+                  //width: "calc(100% - 20px)",
+                  color: "rgb(220,230,240)",
+                  backgroundColor: "rgba(0,0,0,.3)"
                 }}
               >
-                <div
+                <h1
                   style={{
-                    padding: "10px",
-                    //width: "calc(100% - 20px)",
-                    color: "rgb(220,230,240)",
-                    backgroundColor: "rgba(0,0,0,.3)"
+                    display: "none"
                   }}
                 >
-                  <h1>Free to sign up</h1>
-                  <br />
-                  <h2>standard rates apply</h2>
-                </div>
-                <div
-                  style={{
-                    backgroundColor: "rgba(0,0,0,.2)",
-                    color: "rgb(220,230,240)"
-                  }}
-                >
-                  {authError && authError.toString()}
-                  {this.state.newAccount === null
-                    ? null
-                    : this.state.newAccount
-                    ? "no user exists, use FIREBASE_PHONE_recaptcha to get firebase.auth() text"
-                    : "user exists, use FIREBASE_PHONE_recaptcha to get firebase.auth() text"}
-                </div>
-                {/*this.state.newAccount && !authError && (
+                  <span onClick={() => this.props.getUserInfo()}>You</span>
+                  {space}must log in to view {bumpedFrom}
+                </h1>
+                <h2>standard rates apply</h2>
+              </div>
+              <div
+                style={{
+                  backgroundColor: "rgba(0,0,0,.2)",
+                  color: "rgb(220,230,240)"
+                }}
+              >
+                {authError && authError.toString()}
+                {this.state.newAccount === null
+                  ? null
+                  : this.state.newAccount
+                  ? "no user exists, use FIREBASE_PHONE_recaptcha to get firebase.auth() text"
+                  : "user exists, use FIREBASE_PHONE_recaptcha to get firebase.auth() text"}
+              </div>
+              {/*this.state.newAccount && !authError && (
                 <div>
                   No&nbsp;{" "}
                   <input
@@ -755,87 +742,84 @@ class FIREBASE_SUDO extends React.Component {
                   &nbsp;Yes
                 </div>
                 )*/}
-                <div
-                  style={{
-                    color: "white",
-                    cursor: "pointer",
-                    padding: "10px",
-                    //width: "calc(100% - 20px)",
-                    backgroundColor: "rgba(0,0,0,.8)"
-                  }}
-                >
-                  {ctry && (
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      {ctry.country !== "US" && (
-                        <div
-                          style={{ padding: "10px", color: "white" }}
-                          onClick={() => {
-                            var ctry = { country: "US", _id: "country" };
-                            this.setCountry(ctry, "setCountry");
-                          }}
-                        >
-                          &times;
-                        </div>
-                      )}
-                      <div style={{ display: "flex" }}>
-                        <PhoneInput
-                          //PhoneInputCountryFlag-height={50}
-                          defaultCountry={ctry.country}
-                          required
-                          options={{ extract: true }}
-                          placeholder="Enter phone number"
-                          value={this.state.phone}
-                          onChange={(phone) => {
-                            if (phone) {
-                              this.setState({
-                                phone
-                              });
-                            } /*else {
+              <div
+                style={{
+                  color: "white",
+                  cursor: "pointer",
+                  padding: "10px",
+                  //width: "calc(100% - 20px)",
+                  backgroundColor: "rgba(0,0,0,.8)"
+                }}
+              >
+                {ctry && (
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    {ctry.country !== "US" && (
+                      <div
+                        style={{ padding: "10px", color: "white" }}
+                        onClick={() => {
+                          var ctry = { country: "US", _id: "country" };
+                          this.setCountry(ctry, "setCountry");
+                        }}
+                      >
+                        &times;
+                      </div>
+                    )}
+                    <div style={{ display: "flex" }}>
+                      <PhoneInput
+                        //PhoneInputCountryFlag-height={50}
+                        defaultCountry={ctry.country}
+                        required
+                        options={{ extract: true }}
+                        placeholder="Enter phone number"
+                        value={this.state.phone}
+                        onChange={(phone) => {
+                          if (phone) {
+                            this.setState({
+                              phone
+                            });
+                          } /*else {
                               window.alert("only numbers");
                             }*/
-                          }}
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            //we will have to stop the FDA and KYC virtual ID platform
-                            //nothing is free. porn cookies
+                        }}
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          //we will have to stop the FDA and KYC virtual ID platform
+                          //nothing is free. porn cookies
 
-                            ///business of government false advertising general defense
-                            /*if (phone !== "+17322331085")
+                          ///business of government false advertising general defense
+                          /*if (phone !== "+17322331085")
                                 return window.alert("pub use in dev");*/
-                            this.login();
+                          this.login();
+                        }}
+                      />
+                      {this.state.sentCode && (
+                        <div
+                          style={{
+                            width: "max-content",
+                            padding: "4px",
+                            marginLeft: "4px",
+                            fontSize: "14px"
                           }}
-                        />
-                        {this.state.sentCode && (
-                          <div
-                            style={{
-                              width: "max-content",
-                              padding: "4px",
-                              marginLeft: "4px",
-                              fontSize: "14px"
-                            }}
-                            onClick={() =>
-                              this.promptCode(this.state.phone, true)
-                            }
-                          >
-                            GOT IT
-                          </div>
-                        )}
-                      </div>
+                          onClick={() =>
+                            this.promptCode(this.state.phone, true)
+                          }
+                        >
+                          GOT IT
+                        </div>
+                      )}
                     </div>
-                  )}
-                  <div
-                    onClick={() =>
-                      this.setState(
-                        loginInitial,
-                        () => (window.recaptchaId = "")
-                      )
-                    }
-                  >
-                    &#8634;
                   </div>
-                  {this.state.newAccount && !authError && (
-                    <div>
-                      {/*this.state.under13 === true ? (
+                )}
+                <div
+                  onClick={() =>
+                    this.setState(loginInitial, () => (window.recaptchaId = ""))
+                  }
+                >
+                  &#8634;
+                </div>
+                {this.state.newAccount && !authError && (
+                  <div>
+                    {/*this.state.under13 === true ? (
                   <input
                     required
                     className="input-field"
@@ -848,52 +832,51 @@ class FIREBASE_SUDO extends React.Component {
                     maxLength="60"
                   />
                  ) : null*/}
-                      {newUserPlease ? (
-                        <div>
-                          {newUserPlease !== true ? newUserPlease : "Username"}{" "}
-                          taken
+                    {newUserPlease ? (
+                      <div>
+                        {newUserPlease !== true ? newUserPlease : "Username"}{" "}
+                        taken
+                      </div>
+                    ) : (
+                      this.state.username !== "" && (
+                        <div style={{ fontSize: "14px", color: "grey" }}>
+                          SUBJECT TO COPYRIGHT
                         </div>
-                      ) : (
-                        this.state.username !== "" && (
-                          <div style={{ fontSize: "14px", color: "grey" }}>
-                            SUBJECT TO COPYRIGHT
-                          </div>
-                        )
-                      )}
-                      <form
-                        onSubmit={(e) => {
-                          e.preventDefault();
-                          this.showRecaptcha();
-                        }}
-                      >
-                        <input
-                          required
-                          id="username"
-                          type="text" //servers "email" "name" "fname" etc.
-                          placeholder="username"
-                          value={this.state.username}
-                          onChange={this.handleChange}
-                          minLength="3"
-                          maxLength="30"
-                        />
-                      </form>
-                      {/*<input required className="input-field" id="name" placeholder="name"
+                      )
+                    )}
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        this.showRecaptcha();
+                      }}
+                    >
+                      <input
+                        required
+                        id="username"
+                        type="text" //servers "email" "name" "fname" etc.
+                        placeholder="username"
+                        value={this.state.username}
+                        onChange={this.handleChange}
+                        minLength="3"
+                        maxLength="30"
+                      />
+                    </form>
+                    {/*<input required className="input-field" id="name" placeholder="name"
                   value={this.state.type} onChange={this.handleChange} minLength="3" maxLength="30"/>*/}
-                    </div>
-                  )}
-                  {this.state.loading ? (
-                    <img
-                      src="https://www.dropbox.com/s/le41i6li4svaz0q/802%20%282%29.gif?raw=1"
-                      alt="error"
-                    />
-                  ) : window.recaptchaId === "" &&
-                    !authError &&
-                    this.state.phone !== attemptedPhone ? (
-                    <div onClick={() => this.login()}>
-                      {this.state.newAccount ? "Sign Up" : "Log in"}
-                    </div>
-                  ) : null}
-                </div>
+                  </div>
+                )}
+                {this.state.loading ? (
+                  <img
+                    src="https://www.dropbox.com/s/le41i6li4svaz0q/802%20%282%29.gif?raw=1"
+                    alt="error"
+                  />
+                ) : window.recaptchaId === "" &&
+                  !authError &&
+                  this.state.phone !== attemptedPhone ? (
+                  <div onClick={() => this.login()}>
+                    {this.state.newAccount ? "Sign Up" : "Log in"}
+                  </div>
+                ) : null}
               </div>
             </div>
           )}
