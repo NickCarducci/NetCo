@@ -420,7 +420,7 @@ class Auth extends React.Component {
             //Do employees of regular businesses with diverse customers have to report gifted sweat up to $15,000 per year?
           />
         )}
-        <h2>Elite business customers</h2>
+        <h2>Try with dummy data or Elite business customers</h2>
         <span style={{ display: "flex" }}>
           {this.state.user !== undefined && this.state.user.subscriptionId && (
             <div
