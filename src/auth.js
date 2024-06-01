@@ -477,7 +477,7 @@ class Auth extends React.Component {
               }}
             ></div>
           )}
-          {space}$40/month |{space}
+          {space /*$40/month |{*/ + space}
           <b onClick={() => this.props.navigate("/terms")}>terms</b>
           {space}|{space}
           <b onClick={() => this.props.navigate("/privacy")}>privacy</b>
@@ -514,12 +514,13 @@ class Auth extends React.Component {
           navigate={this.props.navigate}
         />
         <i style={{ color: "grey" }}>
-          QuickNet business customers can subscribe to Elite monthly for $40
-          each period to reconcile Quickbooks purchases in the same view as
-          their bank and card transactions.
+          QuickNet business customers can subscribe to Elite monthly each period
+          to reconcile Quickbooks purchases in the same view as their bank and
+          card transactions.
         </i>
       </div>
     );
   }
 }
 export default Auth;
+
