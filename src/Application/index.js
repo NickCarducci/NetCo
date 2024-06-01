@@ -102,7 +102,7 @@ class Line extends React.Component {
                   }
                 };
                 await fetch(
-                  "https://sea-turtle-app-cg9u4.ondigitalocean.app/addpurchase",
+                  "https://hammerhead-app-ws2kg.ondigitalocean.app/addpurchase",
                   {
                     method: "POST",
                     headers: {
@@ -382,7 +382,7 @@ class Account extends React.Component {
             var answer = window.confirm("Delete authorization?");
             if (answer) {
               await fetch(
-                "https://sea-turtle-app-cg9u4.ondigitalocean.app/remove",
+                "https://hammerhead-app-ws2kg.ondigitalocean.app/remove",
                 {
                   method: "POST",
                   headers: {
@@ -422,7 +422,7 @@ class Account extends React.Component {
           <div
             onClick={async () => {
               await fetch(
-                "https://sea-turtle-app-cg9u4.ondigitalocean.app/detail",
+                "https://hammerhead-app-ws2kg.ondigitalocean.app/detail",
                 {
                   method: "POST",
                   headers: {
@@ -494,7 +494,7 @@ class Application extends React.Component {
       if (state === "intuit-test") {
         //const clientSec = new URLSearchParams(window.location.search).get("code");
         await fetch(
-          "https://sea-turtle-app-cg9u4.ondigitalocean.app/quickbookscallback",
+          "https://hammerhead-app-ws2kg.ondigitalocean.app/quickbookscallback",
           {
             method: "POST",
             headers: {
@@ -554,7 +554,7 @@ class Application extends React.Component {
                 }
               );
               await fetch(
-                "https://sea-turtle-app-cg9u4.ondigitalocean.app/quickbooks",
+                "https://hammerhead-app-ws2kg.ondigitalocean.app/quickbooks",
                 {
                   method: "POST",
                   headers: {
@@ -601,7 +601,7 @@ class Application extends React.Component {
                       }}
                       onClick={async () => {
                         await fetch(
-                          "https://sea-turtle-app-cg9u4.ondigitalocean.app/quickbookscustomer",
+                          "https://hammerhead-app-ws2kg.ondigitalocean.app/quickbookscustomer",
                           {
                             method: "POST",
                             headers: {
@@ -656,7 +656,7 @@ class Application extends React.Component {
                       <div
                         onClick={async () => {
                           await fetch(
-                            "https://sea-turtle-app-cg9u4.ondigitalocean.app/quickbooksinfo",
+                            "https://hammerhead-app-ws2kg.ondigitalocean.app/quickbooksinfo",
                             {
                               method: "POST",
                               headers: {
@@ -733,70 +733,77 @@ class Application extends React.Component {
           {quickbooks &&
             //this.state.newSubscription &&
             !this.props.user.subscriptionId && (
-              <Elements stripe={stripePromise}>
-                <ElementsConsumer>
-                  {({ stripe, elements }) => (
-                    <form
-                      onSubmit={async (e) => {
-                        e.preventDefault();
-                        //this.cardRef.current.tokenize().then((data) =>
-                        //{console.log("chargebee token", data.token);});
-                        const { email, name } = this.state,
-                          paymentMethod = await stripe.createPaymentMethod({
-                            type: "card",
-                            card: elements.getElement(CardElement),
-                            billing_details: {
-                              name,
-                              email
-                            }
-                          });
-                        //https://www.mohammadfaisal.dev/blog/how-to-create-a-stripe-subscription-with-reactjs-and-nodejs
-                        await fetch(
-                          "https://sea-turtle-app-cg9u4.ondigitalocean.app/subscribe",
-                          {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                              paymentMethod: paymentMethod.paymentMethod.id,
-                              name,
-                              email,
-                              priceId: "price_1NFOFLHEkeca3H6etn9uECwV"
-                            })
+              <div
+                onClick={() => {
+                  updateDoc(doc(firestore, "userDatas", this.props.auth.uid), {
+                    subscriptionId: "001"
+                  });
+                }}
+              >
+                Subscribe
+              </div>
+            )}
+          {false && (
+            <Elements stripe={stripePromise}>
+              <ElementsConsumer>
+                {({ stripe, elements }) => (
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      //this.cardRef.current.tokenize().then((data) =>
+                      //{console.log("chargebee token", data.token);});
+                      const { email, name } = this.state,
+                        paymentMethod = await stripe.createPaymentMethod({
+                          type: "card",
+                          card: elements.getElement(CardElement),
+                          billing_details: {
+                            name,
+                            email
                           }
-                        )
-                          .then((res) => res.json())
-                          .then(async (response) => {
-                            const confirmPayment = await stripe.confirmCardPayment(
-                              response.clientSecret
-                            );
+                        });
+                      //https://www.mohammadfaisal.dev/blog/how-to-create-a-stripe-subscription-with-reactjs-and-nodejs
+                      await fetch(
+                        "https://hammerhead-app-ws2kg.ondigitalocean.app/subscribe",
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json"
+                          },
+                          body: JSON.stringify({
+                            paymentMethod: paymentMethod.paymentMethod.id,
+                            name,
+                            email,
+                            priceId: "price_1NFOFLHEkeca3H6etn9uECwV"
+                          })
+                        }
+                      )
+                        .then((res) => res.json())
+                        .then(async (response) => {
+                          const confirmPayment = await stripe.confirmCardPayment(
+                            response.clientSecret
+                          );
 
-                            if (confirmPayment.error) {
-                              console.log(confirmPayment.error.message);
-                            } else {
-                              updateDoc(
-                                doc(
-                                  firestore,
-                                  "userDatas",
-                                  this.props.auth.uid
-                                ),
-                                {
-                                  subscriptionId: response.subscription
-                                }
-                              );
-                              window.alert(
-                                "Success! Check your email for the invoice. " +
-                                  "You can now add QuickBooks purchases through QuickNet."
-                              );
-                            }
-                          });
-                      }}
-                      style={{
-                        maxWidth: "360px"
-                      }}
-                    >
-                      {/*<CardComponent
+                          if (confirmPayment.error) {
+                            console.log(confirmPayment.error.message);
+                          } else {
+                            updateDoc(
+                              doc(firestore, "userDatas", this.props.auth.uid),
+                              {
+                                subscriptionId: response.subscription
+                              }
+                            );
+                            window.alert(
+                              "Success! Check your email for the invoice. " +
+                                "You can now add QuickBooks purchases through QuickNet."
+                            );
+                          }
+                        });
+                    }}
+                    style={{
+                      maxWidth: "360px"
+                    }}
+                  >
+                    {/*<CardComponent
                           style={{ width: "100%" }}
                           ref={this.cardRef}
                           onChange={this.onChange}
@@ -805,31 +812,27 @@ class Application extends React.Component {
                           <CardExpiry />
                           <CardCVV />
                         </CardComponent>*/}
-                      <CardElement stripe={stripe} elements={elements} />
-                      <input
-                        placeholder="Name"
-                        type="text"
-                        value={this.state.name}
-                        onChange={(e) =>
-                          this.setState({ name: e.target.value })
-                        }
-                      />
-                      $40 per month
-                      <br />
-                      <input
-                        placeholder="Email"
-                        type="text"
-                        value={this.state.email}
-                        onChange={(e) =>
-                          this.setState({ email: e.target.value })
-                        }
-                      />
-                      <button type="submit">Submit</button>
-                    </form>
-                  )}
-                </ElementsConsumer>
-              </Elements>
-            )}
+                    <CardElement stripe={stripe} elements={elements} />
+                    <input
+                      placeholder="Name"
+                      type="text"
+                      value={this.state.name}
+                      onChange={(e) => this.setState({ name: e.target.value })}
+                    />
+                    {/*$40 per month*/}
+                    <br />
+                    <input
+                      placeholder="Email"
+                      type="text"
+                      value={this.state.email}
+                      onChange={(e) => this.setState({ email: e.target.value })}
+                    />
+                    <button type="submit">Submit</button>
+                  </form>
+                )}
+              </ElementsConsumer>
+            </Elements>
+          )}
           {!quickbooks ? null : this.state.plaid_link ? (
             <PlaidLink
               style={{ padding: "20px", fontSize: "16px", cursor: "pointer" }}
@@ -840,7 +843,7 @@ class Application extends React.Component {
                 console.log(publicToken, metadata);
 
                 await fetch(
-                  "https://sea-turtle-app-cg9u4.ondigitalocean.app/plaid",
+                  "https://hammerhead-app-ws2kg.ondigitalocean.app/plaid",
                   {
                     method: "POST",
                     headers: {
@@ -901,7 +904,7 @@ class Application extends React.Component {
               style={{ margin: "4px 0px" }}
               onClick={async () => {
                 await fetch(
-                  "https://sea-turtle-app-cg9u4.ondigitalocean.app/link",
+                  "https://hammerhead-app-ws2kg.ondigitalocean.app/link",
                   {
                     method: "POST",
                     headers: {
@@ -1024,7 +1027,7 @@ class Application extends React.Component {
                     zeropad(date.getDate());
                 //return console.log(start_date, end_date);
                 await fetch(
-                  "https://sea-turtle-app-cg9u4.ondigitalocean.app/transactions",
+                  "https://hammerhead-app-ws2kg.ondigitalocean.app/transactions",
                   {
                     method: "POST",
                     headers: {
@@ -1199,3 +1202,4 @@ export default Application;
             </tbody>
           </table>
  */
+
