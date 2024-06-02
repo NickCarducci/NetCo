@@ -737,7 +737,7 @@ class Application extends React.Component {
               <div
                 onClick={() => {
                   updateDoc(doc(firestore, "userDatas", this.props.auth.uid), {
-                    subscriptionId: "001"
+                    subscriptionId: this.props.auth.uid
                   });
                 }}
               >
@@ -1204,5 +1204,3 @@ export default Application;
             </tbody>
           </table>
  */
-
-
