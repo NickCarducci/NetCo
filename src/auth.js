@@ -435,45 +435,52 @@ class Auth extends React.Component {
                 var answer = window.confirm(
                   "Would you like you delete your subscription? This cannot be undone."
                 );
-                answer &&
-                  (await fetch(
-                    "https://sea-turtle-app-cg9u4.ondigitalocean.app/deletesubscription",
-                    {
-                      method: "POST",
-                      headers: {
-                        "Access-Control-Request-Method": "POST",
-                        "Access-Control-Request-Headers": [
-                          "Origin",
-                          "Content-Type"
-                        ], //allow referer
-                        "Content-Type": "Application/JSON"
-                      },
-                      body: JSON.stringify({
-                        subscriptionId: this.state.user.subscriptionId,
-                        access_tokens: this.state.user.accessTokens
-                      })
+                return (
+                  answer &&
+                  updateDoc(doc(firestore, "userDatas", meAuth.uid), {
+                    subscriptionId: deleteField()
+                  }).then(() => {
+                    //console.log("deleted success");
+                  })
+                );
+                await fetch(
+                  "https://sea-turtle-app-cg9u4.ondigitalocean.app/deletesubscription",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Access-Control-Request-Method": "POST",
+                      "Access-Control-Request-Headers": [
+                        "Origin",
+                        "Content-Type"
+                      ], //allow referer
+                      "Content-Type": "Application/JSON"
+                    },
+                    body: JSON.stringify({
+                      subscriptionId: this.state.user.subscriptionId,
+                      access_tokens: this.state.user.accessTokens
+                    })
+                  }
+                ) //stripe account, not plaid access token payout yet
+                  .then(async (res) => await res.json())
+                  .then(async (result) => {
+                    if (result.status) return console.log(result);
+                    if (
+                      result.subscription ||
+                      (result.error &&
+                        result.error.raw &&
+                        result.error.raw.message &&
+                        result.error.raw.message.includes(
+                          "No such subscription: "
+                        ))
+                    ) {
+                      console.log("delete sub id");
+                      updateDoc(doc(firestore, "userDatas", meAuth.uid), {
+                        subscriptionId: deleteField()
+                      });
+                      return window.location.reload();
                     }
-                  ) //stripe account, not plaid access token payout yet
-                    .then(async (res) => await res.json())
-                    .then(async (result) => {
-                      if (result.status) return console.log(result);
-                      if (
-                        result.subscription ||
-                        (result.error &&
-                          result.error.raw &&
-                          result.error.raw.message &&
-                          result.error.raw.message.includes(
-                            "No such subscription: "
-                          ))
-                      ) {
-                        console.log("delete sub id");
-                        updateDoc(doc(firestore, "userDatas", meAuth.uid), {
-                          subscriptionId: deleteField()
-                        });
-                        return window.location.reload();
-                      }
-                      console.log("dev error (Cash)", result);
-                    }));
+                    console.log("dev error (Cash)", result);
+                  });
               }}
             ></div>
           )}
@@ -523,4 +530,3 @@ class Auth extends React.Component {
   }
 }
 export default Auth;
-
