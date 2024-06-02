@@ -730,7 +730,8 @@ class Application extends React.Component {
               {">"}
             </div>
           </div>
-          {quickbooks &&
+          {
+            //quickbooks &&
             //this.state.newSubscription &&
             !this.props.user.subscriptionId && (
               <div
@@ -742,7 +743,8 @@ class Application extends React.Component {
               >
                 Subscribe
               </div>
-            )}
+            )
+          }
           {false && (
             <Elements stripe={stripePromise}>
               <ElementsConsumer>
@@ -1202,4 +1204,5 @@ export default Application;
             </tbody>
           </table>
  */
+
 
