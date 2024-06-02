@@ -905,32 +905,33 @@ class Application extends React.Component {
             <button
               style={{ margin: "4px 0px" }}
               onClick={async () => {
-                await fetch(
-                  "https://hammerhead-app-ws2kg.ondigitalocean.app/link",
-                  {
-                    method: "POST",
-                    headers: {
-                      "Access-Control-Request-Method": "POST",
-                      "Access-Control-Request-Headers": [
-                        "Origin",
-                        "Content-Type"
-                      ], //allow referer
-                      "Content-Type": "Application/JSON"
-                    },
-                    body: JSON.stringify({
-                      subscriptionId: this.props.user.subscriptionId
+                this.props.user.subscriptionId &&
+                  (await fetch(
+                    "https://hammerhead-app-ws2kg.ondigitalocean.app/link",
+                    {
+                      method: "POST",
+                      headers: {
+                        "Access-Control-Request-Method": "POST",
+                        "Access-Control-Request-Headers": [
+                          "Origin",
+                          "Content-Type"
+                        ], //allow referer
+                        "Content-Type": "Application/JSON"
+                      },
+                      body: JSON.stringify({
+                        subscriptionId: this.props.user.subscriptionId
+                      })
+                    }
+                  ) //stripe account, not plaid access token payout yet
+                    .then(async (res) => await res.json())
+                    .then(async (result) => {
+                      if (result.status) return console.log(result);
+                      if (result.error) return console.log(result);
+                      if (!result.link_token)
+                        return console.log("dev error (Cash)", result);
+                      this.setState({ plaid_link: result.link_token });
                     })
-                  }
-                ) //stripe account, not plaid access token payout yet
-                  .then(async (res) => await res.json())
-                  .then(async (result) => {
-                    if (result.status) return console.log(result);
-                    if (result.error) return console.log(result);
-                    if (!result.link_token)
-                      return console.log("dev error (Cash)", result);
-                    this.setState({ plaid_link: result.link_token });
-                  })
-                  .catch(standardCatch);
+                    .catch(standardCatch));
               }}
             >
               {!this.props.user.subscriptionId
