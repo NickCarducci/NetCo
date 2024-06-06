@@ -544,7 +544,7 @@ class Application extends React.Component {
         <div style={{ margin: 5 }}>
           <button
             onClick={async () => {
-              /*const userData = await getDoc(
+              const userData = await getDoc(
                 doc(firestore, "userDatas", this.props.auth.uid)
               );
               (userData.exists() ? updateDoc : setDoc)(
@@ -552,7 +552,7 @@ class Application extends React.Component {
                 {
                   quickbooks: []
                 }
-              );*/
+              );
               await fetch(
                 "https://hammerhead-app-ws2kg.ondigitalocean.app/quickbooks",
                 {
