@@ -307,7 +307,21 @@ class Auth extends React.Component {
           ? window.meAuth
           : undefined,
       space = " ";
-    return this.props.pathname === "/privacy" ? (
+    return this.props.pathname === "/sla" ? (
+      <div>
+        Critical vulnerabilities to be remediated within a week upon discovery.
+        There are no foreseen vulnerabilities at the moment. Our build is
+        react-app-rewired, and our backend is DigitalOcean.
+        <br />
+        <br />
+        Our data deletion and retention policy allows for deletion upon request.
+        We collect usernames and phone numbers, and store them on our Google
+        Firebase Firestore server. Otherwise, we use third party API’s to
+        showcase other information.
+        {space}
+        <b onClick={() => this.props.navigate("/")}>back</b>
+      </div>
+    ) : this.props.pathname === "/privacy" ? (
       <div>
         NetCo uses Quickbooks Online and Plaid to query purchases made with your
         banks and cards to reconcile adjacent purchases by date. Google Firebase
@@ -488,6 +502,8 @@ class Auth extends React.Component {
           <b onClick={() => this.props.navigate("/terms")}>terms</b>
           {space}|{space}
           <b onClick={() => this.props.navigate("/privacy")}>privacy</b>
+          {space}|{space}
+          <b onClick={() => this.props.navigate("/sla")}>sla</b>
           {space}|{space}nick@quick.net.co
         </span>
         <h2>
